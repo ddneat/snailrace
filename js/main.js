@@ -72,7 +72,7 @@ function changeCamera(){
 }
 //initialize scene
 function init(){
-	// check if webgl is supported, otherwise print message
+	// check if WebGl-rendering is supported, otherwise print message
 	if (!Detector.webgl){
 		alert("WebGL is not supported or enabled. Please use a modern Browser.");
 		Detector.addGetWebGLMessage();
@@ -102,13 +102,13 @@ function init(){
 	
 	// camera viewport and configuration, PerspectiveCamera(angle, aspect, near, far)
 	camera = new THREE.PerspectiveCamera(45, SCREEN_WIDTH/SCREEN_HEIGHT, 0.1, 100000);
-	camera.position.set(10, 10, 10); // set positon of the camera
+	camera.position.set(10, 10, 10); // set position of the camera
 	camera.lastPosition = new THREE.Vector3(10,10,10);
 	camera.lookAt(new THREE.Vector3(0,0,0)); // scene point camera is looking at
 	scene.add(camera); // add camera to scene
-	//camera for finishscreen
+	//camera for finish screen
 	cameraFinish = new THREE.PerspectiveCamera(45, SCREEN_WIDTH/SCREEN_HEIGHT, 0.1, 100000);
-	cameraFinish.position.set(10, 10, 10); // set positon of the camera
+	cameraFinish.position.set(10, 10, 10); // set position of the camera
 	cameraFinish.lastPosition = new THREE.Vector3(10,10,10);
 	cameraFinish.lookAt(new THREE.Vector3(0,0,0)); // scene point camera is looking at
 	scene.add(cameraFinish); // add camera to scene
@@ -150,14 +150,14 @@ function init(){
 		views[1].camera = cameraFinish;
 	
 
-	// point light, THREE.PointLight(color, idensity)
+	// point light, THREE.PointLight(color, density)
 	var PointLight = new THREE.PointLight(0xffffff, 0.2);
-	PointLight.position.set(10,20,-40); // set postion of light
+	PointLight.position.set(10,20,-40); // set position of light
   	scene.add(PointLight); // add light to scene
       
-	// directional light, THREE.DirectionalLight(color, idensity)
+	// directional light, THREE.DirectionalLight(color, density)
 	var directionalLight  = new THREE.DirectionalLight(0xffffff, 1.0);
-	directionalLight.position.set(10,20,10); // set positon
+	directionalLight.position.set(10,20,10); // set position
 	// shadow settings
 	directionalLight.shadowDarkness = 0.7;
 	directionalLight.shadowCameraRight = 30;
@@ -177,13 +177,13 @@ function init(){
 	var FC, MC, GC, floor_width = 10, floor_height = 30, snailSpeed = 0.1, finPosZ = 23;
 
 	// create floors
-	FC = new floorController(createCaption, floor_width, floor_height, finPosZ);
+	FC = new FloorController(createCaption, floor_width, floor_height, finPosZ);
 
 	// load snail and flag models
-	MC = new modelController(scene, snailModels, finPosZ, floor_width, floor_height);
+	MC = new ModelController(scene, snailModels, finPosZ, floor_width, floor_height);
 
 	// create gameController
-	GC = new gameController(FC, MC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles);
+	GC = new GameController(FC, MC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(renderer, camera);
@@ -204,7 +204,7 @@ function createCaption(text, height, size, position, rotation, color, opacity, n
 	newObject.castShadow = shadow.castShadow;
 	newObject.receiveShadow = shadow.receiveShadow;
 
-	// alernative to newObject.rotaion is to use THREE.Matrix
+	// alternative to newObject.rotation is to use THREE.Matrix
 	// newObject.applyMatrix(new THREE.Matrix4().makeRotationZ( Math.PI / 2 ))
 	// newObject.applyMatrix(new THREE.Matrix4().makeRotationX( - Math.PI / 2 ));
 	newObject.rotation = rotation;
@@ -233,9 +233,9 @@ function render(){
 	if(gameOver){
 		animateParticleSystem();
 		//viewports
-		for ( var ii = 0; ii < views.length; ++ii ) {
+		for ( var k = 0; k < views.length; ++k ) {
 
-			view = views[ii];
+			view = views[k];
 			camera = view.camera;
 			view.updateCamera( camera, scene);
 

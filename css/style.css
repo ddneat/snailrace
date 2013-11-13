@@ -345,6 +345,7 @@ http://twitter.github.io/bootstrap/
 
 #changecamera{
 	position: absolute;
+    display:none;
 }
 
 .btn-small-grey {

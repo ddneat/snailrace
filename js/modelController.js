@@ -4,7 +4,7 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function modelController(scene, snailModels, finPosZ, floor_width, floor_height){
+function ModelController(scene, snailModels, finPosZ, floor_width, floor_height){
 
 	function snail(filename, position){
 		this.pathObj = "models/" + filename + ".obj";
@@ -15,7 +15,7 @@ function modelController(scene, snailModels, finPosZ, floor_width, floor_height)
 	// load flag-model
 	loadFlag();
 
-	// load diffrent snail-models
+	// load different snail-models
 	loadSnail(new snail("snailmodelRed"));
 	loadSnail(new snail("snailmodelBlue"));
 	loadSnail(new snail("snailmodelGreen"));
@@ -43,11 +43,11 @@ function modelController(scene, snailModels, finPosZ, floor_width, floor_height)
 		loader.load(snail.pathObj, snail.pathMtl);
 	}
 	//set the snails on the map
-	modelController.prototype.setPlayerSnails = function(playerCount){
+	ModelController.prototype.setPlayerSnails = function(playerCount){
 		for(var i=0; i < playerCount; i++){
 			setSingleSnail(i);
 		}
-	}
+	};
 
 	function setSingleSnail(playerNumber){
 		var trackWidth = floor_width / 4;

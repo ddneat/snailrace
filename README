@@ -1,1 +1,16 @@
-boring webgl game
+boring webgl game: snailrace.mediacube.at
+
+refactor:
+
+# unused
+- removed some unused variables
+- even removed two  unused files ( webglController and  other useless file)
+- removed another unused file: geometryController
+
+# spelling
+- spelling mistakes corrected
+- corrected a lot ..
+- and more
+- halfmodel to halofModelSize
+- naming-convention: changed  gameController to GameController
+

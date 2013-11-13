@@ -1,4 +1,4 @@
-function gameController(webgl){
+function GameController(webgl){
 	var startBtn = document.getElementById("startgame");
 	startBtn.addEventListener('click', startGame, false);
 
@@ -51,7 +51,7 @@ function gameController(webgl){
 		// snailModels[snailIndex].position.z -= 1;
 		var player = playerSnails[snailIndex];
 		// set new position of snail
-		// into negativ z-axis
+		// into minus z-axis
 		player.position.z -= snailSpeed;
 
 		// if devCam is not enabled, set camera to new position
@@ -59,8 +59,8 @@ function gameController(webgl){
 			setCameraInGame();
 
 		// check if user reached finish
-		var halfmodel = 1.3; // model-pivot is center, with halfmodel -> head
-		if(Math.abs(player.position.z - halfmodel) >= finPosZ && !gameOver)
+		var halfModelSize = 1.3; // model-pivot is center, with halfModelSize -> head
+		if(Math.abs(player.position.z - halfModelSize) >= finPosZ && !gameOver)
 			setGameOver(snailIndex);
 
 		function setCameraInGame(){

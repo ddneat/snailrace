@@ -4,7 +4,7 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function gameController(floorController, modelController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles){
+function GameController(floorController, modelController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles){
 	var startBtn = document.getElementById("startgame");
 	startBtn.addEventListener('click', startGame, false);
 
@@ -71,8 +71,7 @@ function gameController(floorController, modelController, createCaption, finPosZ
 		player.position.z -= snailSpeed;
 		addSlime();
 		// if devCam is not enabled, set camera to new position
-		if(!devCam)
-			setCameraInGame();
+		if(!devCam) setCameraInGame();
 
 		// check if user reached finish
 		var halfmodel = 1.3; // model-pivot is center, with halfmodel -> head

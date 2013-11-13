@@ -4,7 +4,7 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function floorController(createCaption, floor_width, floor_height, finPosZ){
+function FloorController(createCaption, floor_width, floor_height, finPosZ){
 	// floor constuctor
 	function floor(textureName, size, posCenter, correctionY, opacity, repeatValue){
 		this.textureName = textureName;
@@ -42,7 +42,7 @@ function floorController(createCaption, floor_width, floor_height, finPosZ){
 		newObject.position = { x: floor.posCenter.x, y: floor.correctionY, z: - floor.posCenter.y };
 		// add floor to scene
 		scene.add(newObject);
-	}
+	};
 
 	function createTrackCaption(){
 		// add start and finish-lines
@@ -52,7 +52,7 @@ function floorController(createCaption, floor_width, floor_height, finPosZ){
 		var startCaptionFront = new floor('', lineSize, linePivotCenter, 0.01, opacity,
 							repeat = {x: lineSize.width / 5, y: lineSize.height / 5});
 		startCaptionFront.addPlaneToScene();
-		// start: behind snale
+		// start: behind snail
 		linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 + 1, z: 0};
 		var startCaptionBehind = new floor('', lineSize, linePivotCenter, 0.01, opacity,
 							repeat = {x: lineSize.width / 5, y: lineSize.height / 5});
