@@ -21,15 +21,12 @@ var slimeTextureBegin = THREE.ImageUtils.loadTexture('img/slimeBegin.png');
 
 
 window.onload = function(){
-	
 	if(animationFrameID){
 		cancelAnimationFrame(animationFrameID);
 	}
 	parseLocalStorageData();
 	showSettings();
 	init();
-
-	
 };
 //loads the values from the local storage and writes it to the screen
 function parseLocalStorageData(){
@@ -48,16 +45,21 @@ function parseLocalStorageData(){
 	}
 	
 }
+
+// set player count by value
+function setPlayerCount(amount){
+	$("#playerCount").html(amount);
+}
 //shows settings
 function showSettings(){
 	$("#playerAdd").click(function() {
 		if(playerCount < 4){
-			$("#playerCount").html(++playerCount);
+			setPlayerCount(++playerCount);
 		}
 	});
 	$("#playerRemove").click(function() {
 		if(playerCount > 1){
-			$("#playerCount").html(--playerCount);
+			setPlayerCount(--playerCount);
 		}
 	});
 

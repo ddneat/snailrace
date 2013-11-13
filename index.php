@@ -68,7 +68,7 @@
 				</div>
 			</div>
 			<div id="impressum">by
-				<a href="https://twitter.com/rocketshape" title="webpumpkin blog">David Neubauer</a> and
+				<a href="https://twitter.com/rocketshape" title="rocketshape blog">David Neubauer</a> and
 				Joscha Probst
 			</div>
 		</div>
