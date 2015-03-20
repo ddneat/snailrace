@@ -4,7 +4,8 @@
   "description": "boring webgl game: snailrace.mediacube.at",
   "main": "index.html",
   "scripts": {
-    "test": "test"
+    "cover": "rm -Rf coverage; istanbul cover node_modules/.bin/_mocha",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",

@@ -211,4 +211,12 @@ function GameController(floorController, modelController, createCaption, finPosZ
 			scene.add(particles[i]);
 		}	
 	}
+
+    return {
+        setGameOver: setGameOver
+    }
+}
+
+exports._test = {
+    GameController: GameController
 }
