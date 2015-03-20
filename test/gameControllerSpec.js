@@ -19,12 +19,17 @@ var cameraFinish = {
     }
 };
 
+function getEndTime() {
+    var endTime = (new Date().getTime() - startTime) / 1000;//highscore-time
+    endTime.toFixed(3);
+    return endTime;
+}
+
 function setGameOver(winID){
     gameOver = true;
     winner = winID;
-    endTime = (new Date().getTime() - startTime) /1000;//highscore-time
-    endTime.toFixed(3);
-    gameOverScreen(endTime);
+
+    gameOverScreen(getEndTime());
     console.log("snail on track" + (winID+1) + " won");
     // render message in webgl
     var text = "CHAMPION 4EVER";
