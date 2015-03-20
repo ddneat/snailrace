@@ -29,25 +29,26 @@ function removeControls() {
     }, 3000);
 }
 
-function setGameOver(winID){
-    gameOver = true;
-    winner = winID;
-
-    gameOverScreen(getEndTime());
-    console.log("snail on track" + (winID+1) + " won");
-    // render message in webgl
-    var text = "CHAMPION 4EVER";
+function renderChampionText(winID) {
+// render message in webgl
     var objName = "winner", fontheight = 0.01, fontsize = 1.8, color = 0xFFFFFF;
-    createCaption(text, fontheight, fontsize,
-        position = { x: floor_width / 4 * winID + 1.3, y: 0, z: -12 },
-        rotation = { x: - Math.PI / 2, y: 0, z: Math.PI / 2 },
+    createCaption("CHAMPION 4EVER", fontheight, fontsize,
+        position = {x: floor_width / 4 * winID + 1.3, y: 0, z: -12},
+        rotation = {x: -Math.PI / 2, y: 0, z: Math.PI / 2},
         color, 0.9, objName, lambert = true, shadow = true);
-
+}
+function setGameOverScreen(winID) {
+    gameOverScreen(getEndTime());
+    renderChampionText(winID);
     // add ParticleSystem to scene
     addParticleSystem(winID);
 
-    cameraFinish.position.set(1,4, playerSnails[winID].position.z-8);
-
+    cameraFinish.position.set(1, 4, playerSnails[winID].position.z - 8);
+}
+function setGameOver(winID){
+    gameOver = true;
+    winner = winID;
+    setGameOverScreen(winID);
     removeControls();
 }
 
