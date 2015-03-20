@@ -22,24 +22,6 @@
 		<div id="loadingBar">Loading..</div>
 		<div id="lobbyContainer">
 			<div id="lobbyContent">
-				<?php
-					// Open the file for reading 
-					$fp = fopen("counterlog.txt", "r"); 
-					// Get the existing count 
-					$count = fread($fp, 1024); 
-					// Close the file 
-					fclose($fp); 
-					// Add 1 to the existing count 
-					$count = $count + 1; 
-					// Display the number of hits 
-					echo "<div id='counter'>Page views: " . $count . "</div>"; 
-					// Reopen the file and erase the contents 
-					$fp = fopen("counterlog.txt", "w"); 
-					// Write the new count to the file 
-					fwrite($fp, $count); 
-					// Close the file 
-					fclose($fp); 
-				?>
 				<div id="contentWrapper">
 					<div id="highContainer" class="contentElement">
 						<div id="contentHeader">Highscore:</div>

@@ -1,0 +1,23 @@
+{
+  "name": "snailrace",
+  "version": "1.0.0",
+  "description": "boring webgl game: snailrace.mediacube.at",
+  "main": "index.html",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidneat/snailrace.git"
+  },
+  "author": "14pixels and davidneat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davidneat/snailrace/issues"
+  },
+  "homepage": "https://github.com/davidneat/snailrace",
+  "devDependencies": {
+    "istanbul": "^0.3.8",
+    "mocha": "^2.2.1"
+  }
+}
