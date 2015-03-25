@@ -1,12 +1,10 @@
-/*********************************
-project snailrace - computer graphics
-by David Neubauer and Joscha Probst
-University of Applied Sciences Salzburg
-********************************/
+import { Game } from 'modules/Game.js';
+
+var game = new Game();
 
 // global variables
 var renderer, scene, camera, cameraFinish, playerSnails = [], snailModels = [], playerCount = 2, winner = 0, views, startTime, endTime;
-var controls, devCam = false, modelsToLoad = 0, gameOver = false, particles = [];
+var controls, devCam = false, modelsToLoad = 0, particles = [];
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 var animationFrameID = null;
 //slime textures
@@ -230,7 +228,7 @@ function render(){
 		controls.update();
 	}
 
-	if(gameOver){
+	if(game.isGameOver){
 		animateParticleSystem();
 		//viewports
 		for ( var k = 0; k < views.length; ++k ) {
@@ -257,7 +255,7 @@ function render(){
 	}
 
 	// render scene
-	if(!gameOver)
+	if(!game.isGameOver)
 		renderer.render(scene, camera);
 	// render-loop
 	animationFrameID = requestAnimationFrame(function(){
