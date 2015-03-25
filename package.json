@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/davidneat/snailrace",
   "devDependencies": {
+    "babel-core": "^4.7.16",
     "istanbul": "^0.3.8",
     "mocha": "^2.2.1"
   }

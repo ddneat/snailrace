@@ -37,6 +37,7 @@ function renderChampionText(winID) {
         rotation = {x: -Math.PI / 2, y: 0, z: Math.PI / 2},
         color, 0.9, objName, lambert = true, shadow = true);
 }
+
 function setGameOverScreen(winID) {
     gameOverScreen(getEndTime());
     renderChampionText(winID);
@@ -45,6 +46,7 @@ function setGameOverScreen(winID) {
 
     cameraFinish.position.set(1, 4, playerSnails[winID].position.z - 8);
 }
+
 function setGameOver(winID){
     gameOver = true;
     winner = winID;
