@@ -4,7 +4,7 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function FloorController(createCaption, floor_width, floor_height, finPosZ){
+function FloorController(createCaption, floor_width, floor_height, finPosZ, scene){
 	// floor constuctor
 	function floor(textureName, size, posCenter, correctionY, opacity, repeatValue){
 		this.textureName = textureName;
@@ -15,8 +15,11 @@ function FloorController(createCaption, floor_width, floor_height, finPosZ){
 		this.repeatValue = repeatValue;
 	}
 
+
+
 	floor.prototype.addPlaneToScene = function(floor){
 		var floor = this;
+
 
 		var newObjectGeometry = new THREE.PlaneGeometry(floor.size.width, floor.size.height, 0); //width, height, segments
 		var newObjectTexture, newObjectMaterial;

@@ -17,6 +17,9 @@ var cameraFinish = {
     }
 };
 
+
+
+
 export class Game {
 
     constructor() {

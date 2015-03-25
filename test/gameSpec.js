@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { Game } from '../js/modules/Game.js';
+import { Game } from '../src/modules/Game.js';
 
 describe('Game', function(){
     describe('setGameOver', function(){

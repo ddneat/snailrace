@@ -4,7 +4,10 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function ModelController(scene, snailModels, finPosZ, floor_width, floor_height){
+function ModelController(scene, finPosZ, floor_width, floor_height, playerSnails){
+
+    var modelsToLoad = 0;
+    var snailModels = [];
 
 	function snail(filename, position){
 		this.pathObj = "models/" + filename + ".obj";
@@ -38,6 +41,7 @@ function ModelController(scene, snailModels, finPosZ, floor_width, floor_height)
 			newModel.updateMatrix();
 			newModel.castShadow = true;
 			snailModels.push(newModel); // push to snailModels array
+            console.log(snailModels);
 			loadComplete(); // call on model loaded, userfeedback
 		}, false);
 		loader.load(snail.pathObj, snail.pathMtl);
@@ -52,9 +56,10 @@ function ModelController(scene, snailModels, finPosZ, floor_width, floor_height)
 	function setSingleSnail(playerNumber){
 		var trackWidth = floor_width / 4;
 		var newModel = snailModels[playerNumber].clone();
+        console.log('yyyy');
 		newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
-		playerSnails.push(newModel);
-		playerSnails[playerNumber].slimeCounter = 0;
+		playerSnails.snails.push(newModel);
+		playerSnails.snails[playerNumber].slimeCounter = 0;
 		scene.add(newModel);
 	}
 

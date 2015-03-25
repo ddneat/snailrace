@@ -4,11 +4,14 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function GameController(floorController, modelController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles){
+function GameController(floorController, modelController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, playerCount, slimeTexture, slimeTextureBegin, devCam, camera, game, cameraFinish){
 	var startBtn = document.getElementById("startgame");
+    var startTime;
+    var endTime;
 	startBtn.addEventListener('click', startGame, false);
 
 	function startGame(){
+        console.log('start game', modelController);
 		// set snails, depending on playerCount selected
 		modelController.setPlayerSnails(playerCount);
 		// hide lobby with slide effect, duration 1 second
@@ -64,18 +67,17 @@ function GameController(floorController, modelController, createCaption, finPosZ
 	}
 	//moves models on the scene
 	function modelMove(snailIndex){
-		// snailModels[snailIndex].position.z -= 1;
-		var player = playerSnails[snailIndex];
 		// set new position of snail
 		// into negativ z-axis
-		player.position.z -= snailSpeed;
+        console.log(playerSnails);
+		playerSnails.snails[snailIndex].position.z -= snailSpeed;
 		addSlime();
 		// if devCam is not enabled, set camera to new position
 		if(!devCam) setCameraInGame();
 
 		// check if user reached finish
 		var halfmodel = 1.3; // model-pivot is center, with halfmodel -> head
-		if(Math.abs(player.position.z - halfmodel) >= finPosZ && !gameOver)
+		if(Math.abs(playerSnails.snails[snailIndex].position.z - halfmodel) >= finPosZ && !game.isGameOver)
 			setGameOver(snailIndex);
 		//camera movement
 		function setCameraInGame(){
@@ -89,8 +91,8 @@ function GameController(floorController, modelController, createCaption, finPosZ
 
 			function getFirstAndLastSnailPositionZ(){
 				var min = 10, max = 0, element, z;
-				for(var i = 0; i < playerSnails.length; i++){
-					element = playerSnails[i];
+				for(var i = 0; i < playerSnails.snails.length; i++){
+					element = playerSnails.snails[i];
 					z = Math.abs(element.position.z);
 					if(z < min){ min = z; }
 					if(z > max){ max = z; }
@@ -100,8 +102,8 @@ function GameController(floorController, modelController, createCaption, finPosZ
 		}
 		//draws slime for each snail
 		function addSlime(){
-			if(player.slimeCounter%20 == 0){
-				if(player.slimeCounter != 0){
+			if(playerSnails.snails[snailIndex].slimeCounter%20 == 0){
+				if(playerSnails.snails[snailIndex].slimeCounter != 0){
 					var slime = new THREE.Mesh(
 						new THREE.PlaneGeometry(0.9, 2, 1, 1),
 						new THREE.MeshLambertMaterial({map: slimeTexture, transparent:true, alphaTest: 0.4})
@@ -115,12 +117,12 @@ function GameController(floorController, modelController, createCaption, finPosZ
 				
 				slime.doubleSided = true;
 				slime.receiveShadow = true;
-				slime.position.set(player.position.x, player.position.y+0.03, player.position.z+0.8);
+				slime.position.set(playerSnails.snails[snailIndex].position.x, playerSnails.snails[snailIndex].position.y+0.03, playerSnails.snails[snailIndex].position.z+0.8);
 				slime.rotation.set(-(90*Math.PI/180), 0, 0);
 				scene.add(slime);
 			}
 			
-			player.slimeCounter++;
+			playerSnails.snails[snailIndex].slimeCounter++;
 		}
 	}
 
@@ -142,7 +144,7 @@ function GameController(floorController, modelController, createCaption, finPosZ
 		// add ParticleSystem to scene
 		addParticleSystem(winID);
 
-		cameraFinish.position.set(1,4, playerSnails[winID].position.z-8);
+		cameraFinish.position.set(1,4, playerSnails.snails[winID].position.z-8);
 
 		// keep movement for 3 seconds enabled
 		function removeControlls(){
@@ -185,7 +187,7 @@ function GameController(floorController, modelController, createCaption, finPosZ
 	function addParticleSystem(index){
 		var materials = [], size;
 		size  = 0.1; // size of particle
-		var x = playerSnails[index].position.x;
+		var x = playerSnails.snails[index].position.x;
 		
 		for (var i = 0; i < 15; i++) {
 			var geometry = new THREE.Geometry();
@@ -211,12 +213,4 @@ function GameController(floorController, modelController, createCaption, finPosZ
 			scene.add(particles[i]);
 		}	
 	}
-
-    return {
-        setGameOver: setGameOver
-    }
-}
-
-exports._test = {
-    GameController: GameController
 }

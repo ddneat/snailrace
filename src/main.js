@@ -1,12 +1,16 @@
-import { Game } from 'modules/Game.js';
+import { Game } from './modules/Game.js';
 
 var game = new Game();
 
-// global variables
-var renderer, scene, camera, cameraFinish, playerSnails = [], snailModels = [], playerCount = 2, winner = 0, views, startTime, endTime;
-var controls, devCam = false, modelsToLoad = 0, particles = [];
+// main only
+var renderer;
+var views;
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 var animationFrameID = null;
+
+// global variables
+var scene, camera, cameraFinish, playerSnails = {snails: []}, playerCount = 2, winner = 0;
+var controls, devCam = false, particles = [];
 //slime textures
 var slimeTexture = THREE.ImageUtils.loadTexture('img/slime.png');
 			// set texture properties, repeat
@@ -138,7 +142,7 @@ function init(){
 					  	camera.position.x = camera.position.x * Math.cos(0.1) + Math.sin(0.1);
 						camera.position.z = camera.position.z * Math.cos(0.1) - Math.sin(0.1);
 
-					 	camera.lookAt( playerSnails[winner].position );
+					 	camera.lookAt( playerSnails.snails[winner].position );
 					}
 				}
 			];
@@ -172,16 +176,16 @@ function init(){
 	controls = new THREE.TrackballControls( camera, renderer.domElement );
 	
 	//game parameters
-	var FC, MC, GC, floor_width = 10, floor_height = 30, snailSpeed = 0.1, finPosZ = 23;
+	var FC, MC, GC, floor_width = 10, floor_height = 30, snailSpeed = 0.9, finPosZ = 23;
 
 	// create floors
-	FC = new FloorController(createCaption, floor_width, floor_height, finPosZ);
+	FC = new FloorController(createCaption, floor_width, floor_height, finPosZ, scene);
 
 	// load snail and flag models
-	MC = new ModelController(scene, snailModels, finPosZ, floor_width, floor_height);
-
+    console.log(playerSnails);
+	MC = new ModelController(scene, finPosZ, floor_width, floor_height, playerSnails);
 	// create gameController
-	GC = new GameController(FC, MC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles);
+	GC = new GameController(FC, MC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, playerCount, slimeTexture, slimeTextureBegin, devCam, camera, game, cameraFinish);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(renderer, camera);
@@ -220,45 +224,46 @@ function animateParticleSystem(){
 		}
 		particles[i].position.y -= 0.1*Math.random();
 	}
-}	
-
-function render(){
-	//free cam
-	if(devCam){
-		controls.update();
-	}
-
-	if(game.isGameOver){
-		animateParticleSystem();
-		//viewports
-		for ( var k = 0; k < views.length; ++k ) {
-
-			view = views[k];
-			camera = view.camera;
-			view.updateCamera( camera, scene);
-
-			var left   = Math.floor( SCREEN_WIDTH  * view.left );
-			var bottom = Math.floor( SCREEN_HEIGHT * view.bottom );
-			var width  = Math.floor( SCREEN_WIDTH  * view.width );
-			var height = Math.floor( SCREEN_HEIGHT * view.height );
-			renderer.setViewport( left, bottom, width, height );
-			renderer.setScissor( left, bottom, width, height );
-			renderer.enableScissorTest ( true );
-
-			camera.aspect = width / height;
-			camera.updateProjectionMatrix();
-
-			renderer.render(scene, camera);
-		}
+}
 
 
-	}
+var render = function render(){
+    //free cam
+    if(devCam){
+        controls.update();
+    }
 
-	// render scene
-	if(!game.isGameOver)
-		renderer.render(scene, camera);
-	// render-loop
-	animationFrameID = requestAnimationFrame(function(){
-		render();
-	});
+    if(game.isGameOver){
+        animateParticleSystem();
+        //viewports
+        for ( var k = 0; k < views.length; ++k ) {
+
+            view = views[k];
+            camera = view.camera;
+            view.updateCamera( camera, scene);
+
+            var left   = Math.floor( SCREEN_WIDTH  * view.left );
+            var bottom = Math.floor( SCREEN_HEIGHT * view.bottom );
+            var width  = Math.floor( SCREEN_WIDTH  * view.width );
+            var height = Math.floor( SCREEN_HEIGHT * view.height );
+            renderer.setViewport( left, bottom, width, height );
+            renderer.setScissor( left, bottom, width, height );
+            renderer.enableScissorTest ( true );
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.render(scene, camera);
+        }
+
+
+    }
+
+    // render scene
+    if(!game.isGameOver)
+        renderer.render(scene, camera);
+    // render-loop
+    animationFrameID = requestAnimationFrame(function(){
+        render();
+    });
 }
