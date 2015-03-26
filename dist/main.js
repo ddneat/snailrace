@@ -13,11 +13,10 @@ var camera,
     playerCount = 2,
     winner = 0;
 var controls,
-    devCam = false,
-    particles = { particles: [] };
+    devCam = false;
 
 var scene = new THREE.Scene();
-var game = new Game();
+var game = new Game({ scene: scene, playerSnails: playerSnails });
 var models = new Models({ scene: scene, playerSnails: playerSnails });
 
 $(game).on("game_over", function () {
@@ -196,7 +195,7 @@ function init() {
 	FC = new FloorController(createCaption, floor_width, floor_height, finPosZ, scene);
 
 	// create gameController
-	GC = new GameController(FC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, devCam, camera, game, cameraFinish);
+	GC = new GameController(FC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, scene, render, playerSnails, devCam, camera, game, cameraFinish);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(renderer, camera);
@@ -225,17 +224,6 @@ function createCaption(text, height, size, position, rotation, color, opacity, n
 	scene.add(newObject); // add object to scene
 }
 
-//animates the particle system
-function animateParticleSystem() {
-
-	for (var i = 0; i < particles.particles.length; i++) {
-		if (particles.particles[i].position.y < -1) {
-			particles.particles[i].position.y = 1;
-		}
-		particles.particles[i].position.y -= 0.1 * Math.random();
-	}
-}
-
 var removeControls = function removeControls() {
 	// keep movement for 3 seconds enabled
 	setTimeout(function () {
@@ -251,7 +239,7 @@ var render = function render() {
 	}
 
 	if (game.isGameOver) {
-		animateParticleSystem();
+		game.animateParticleSystem();
 		//viewports
 		for (var k = 0; k < views.length; ++k) {
 
@@ -295,11 +283,7 @@ Object.defineProperty(exports, "__esModule", {
 var startTime = 0;
 var floor_width;
 var winner;
-var playerSnails = [{
-    position: {
-        z: 0
-    }
-}];
+
 function gameOverScreen() {}
 function createCaption() {}
 function addParticleSystem() {}
@@ -310,10 +294,13 @@ var cameraFinish = {
 };
 
 var Game = exports.Game = (function () {
-    function Game() {
+    function Game(options) {
         _classCallCheck(this, Game);
 
         this.isGameOver = false;
+        this.playerSnails = options.playerSnails;
+        this.particles = [];
+        this.scene = options.scene;
     }
 
     _createClass(Game, {
@@ -340,7 +327,7 @@ var Game = exports.Game = (function () {
                 var materials = [],
                     size;
                 size = 0.1; // size of particle
-                var x = playerSnails.snails[index].position.x;
+                var x = this.playerSnails.snails[index].position.x;
 
                 for (var i = 0; i < 15; i++) {
                     var geometry = new THREE.Geometry();
@@ -361,11 +348,24 @@ var Game = exports.Game = (function () {
                         return (~ ~(Math.random() * 16)).toString(16);
                     });
                     materials[i].color = new THREE.Color(randomColor);
-                    particles.particles[i] = new THREE.ParticleSystem(geometry, materials[i]);
-                    particles.particles[i].position.set(x, 1, -26);
-                    particles.particles[i].sortPosition = true;
+                    this.particles[i] = new THREE.ParticleSystem(geometry, materials[i]);
+                    this.particles[i].position.set(x, 1, -26);
+                    this.particles[i].sortPosition = true;
+                    this.scene.add(this.particles[i]);
+                }
+            }
+        },
+        animateParticleSystem: {
 
-                    scene.add(particles.particles[i]);
+            //animates the particle system
+
+            value: function animateParticleSystem() {
+
+                for (var i = 0; i < this.particles.length; i++) {
+                    if (this.particles[i].position.y < -1) {
+                        this.particles[i].position.y = 1;
+                    }
+                    this.particles[i].position.y -= 0.1 * Math.random();
                 }
             }
         },
@@ -374,9 +374,10 @@ var Game = exports.Game = (function () {
                 gameOverScreen(this.getEndTime());
                 this.renderChampionText(winID);
                 // add ParticleSystem to scene
-                addParticleSystem(winID);
+                this.addParticleSystem(winID);
 
-                cameraFinish.position.set(1, 4, playerSnails[winID].position.z - 8);
+                console.log(this.playerSnails, winID);
+                cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
             }
         },
         setGameOver: {

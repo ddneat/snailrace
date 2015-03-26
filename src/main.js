@@ -7,11 +7,11 @@ var playerSnails = {snails: []};
 
 // global variables
 var camera, cameraFinish, playerCount = 2, winner = 0;
-var controls, devCam = false, particles = {particles: []};
+var controls, devCam = false;
 
 
 var scene = new THREE.Scene();
-var game = new Game();
+var game = new Game({scene: scene, playerSnails: playerSnails});
 var models = new Models({ scene: scene, playerSnails: playerSnails });
 
 $(game).on('game_over', function() {
@@ -196,7 +196,7 @@ function init(){
 	FC = new FloorController(createCaption, floor_width, floor_height, finPosZ, scene);
 
 	// create gameController
-	GC = new GameController(FC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, devCam, camera, game, cameraFinish);
+	GC = new GameController(FC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, scene, render, playerSnails, devCam, camera, game, cameraFinish);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(renderer, camera);
@@ -226,16 +226,7 @@ function createCaption(text, height, size, position, rotation, color, opacity, n
 }
 
 
-//animates the particle system
-function animateParticleSystem(){
-	
-	for (var i = 0; i < particles.particles.length; i++) {
-		if(particles.particles[i].position.y < -1){
-			particles.particles[i].position.y = 1;
-		}
-		particles.particles[i].position.y -= 0.1*Math.random();
-	}
-}
+
 
 var removeControls = function() {
     // keep movement for 3 seconds enabled
@@ -252,7 +243,7 @@ var render = function render(){
     }
 
     if(game.isGameOver){
-        animateParticleSystem();
+        game.animateParticleSystem();
         //viewports
         for ( var k = 0; k < views.length; ++k ) {
 

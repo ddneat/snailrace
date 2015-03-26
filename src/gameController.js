@@ -4,7 +4,7 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function GameController(floorController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, devCam, camera, game, cameraFinish){
+function GameController(floorController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, scene, render, playerSnails, devCam, camera, game, cameraFinish){
 
     var startTime;
     var endTime;

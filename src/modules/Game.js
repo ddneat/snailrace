@@ -1,13 +1,7 @@
 var startTime = 0;
 var floor_width;
 var winner;
-var playerSnails = [
-    {
-        position: {
-            z: 0
-        }
-    }
-];
+
 function gameOverScreen() {}
 function createCaption() {}
 function addParticleSystem() {}
@@ -22,8 +16,11 @@ var cameraFinish = {
 
 export class Game {
 
-    constructor() {
+    constructor(options) {
         this.isGameOver = false;
+        this.playerSnails = options.playerSnails;
+        this.particles = [];
+        this.scene = options.scene;
     }
 
     getEndTime() {
@@ -45,7 +42,7 @@ export class Game {
         console.log('addParticleSytem');
         var materials = [], size;
         size  = 0.1; // size of particle
-        var x = playerSnails.snails[index].position.x;
+        var x = this.playerSnails.snails[index].position.x;
 
         for (var i = 0; i < 15; i++) {
             var geometry = new THREE.Geometry();
@@ -64,11 +61,21 @@ export class Game {
             materials[i] = new THREE.ParticleBasicMaterial( { size: size } );
             var randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
             materials[i].color = new THREE.Color(randomColor);
-            particles.particles[i] = new THREE.ParticleSystem( geometry, materials[i] );
-            particles.particles[i].position.set(x,1,-26);
-            particles.particles[i].sortPosition = true;
+            this.particles[i] = new THREE.ParticleSystem( geometry, materials[i] );
+            this.particles[i].position.set(x,1,-26);
+            this.particles[i].sortPosition = true;
+            this.scene.add(this.particles[i]);
+        }
+    }
 
-            scene.add(particles.particles[i]);
+    //animates the particle system
+    animateParticleSystem(){
+
+        for (var i = 0; i < this.particles.length; i++) {
+            if(this.particles[i].position.y < -1){
+                this.particles[i].position.y = 1;
+            }
+            this.particles[i].position.y -= 0.1*Math.random();
         }
     }
 
@@ -76,9 +83,10 @@ export class Game {
         gameOverScreen(this.getEndTime());
         this.renderChampionText(winID);
         // add ParticleSystem to scene
-        addParticleSystem(winID);
+        this.addParticleSystem(winID);
 
-        cameraFinish.position.set(1, 4, playerSnails[winID].position.z - 8);
+        console.log(this.playerSnails, winID);
+        cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
     }
 
     setGameOver(winID){
