@@ -7,44 +7,6 @@ University of Applied Sciences Salzburg
 "use strict";
 
 function GameController(floorController, modelController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles) {
-	var startBtn = document.getElementById("startgame");
-	startBtn.addEventListener("click", startGame, false);
-
-	function startGame() {
-		// set snails, depending on playerCount selected
-		modelController.setPlayerSnails(playerCount);
-		// hide lobby with slide effect, duration 1 second
-		$("#lobbyContainer").hide("slide", { direction: "up", easing: "easeInCubic" }, 1000);
-		// objname = needed for select from scene.children
-		var objName = "countdown",
-		    fontheight = 1,
-		    fontsize = 4,
-		    text,
-		    color = 16724787;
-		// loop to render countdown 5
-		// enable user controller on GO!
-		function counter(n) {
-			(function loop() {
-				if (--n) {
-					// sets value of n -= 1 before check 0 or 1
-					text = n; // set text to current count-value
-					setTimeout(loop, 1000); // recall loop after 0.1 second
-				} else {
-					startTime = new Date().getTime();
-					text = "GO!", color = 52224;
-					// enable user controller
-					addUserInput();
-				}
-				// remove old caption
-				scene.remove(scene.getChildByName(objName));
-				// add new caption
-				createCaption(text, fontheight, fontsize, position = { x: -1, y: 2.1, z: -2 }, rotation = { x: 0, y: Math.PI / 2, z: 0 }, color, 1, objName, lambert = true, shadow = { receiveShadow: true, castShadow: true });
-				// this.gameStart = new date.timestamp
-			})();
-		}
-		counter(5); // start coundown
-		render(); // start renderer
-	}
 
 	function addUserInput() {
 		window.addEventListener("keyup", checkModelMove, false);

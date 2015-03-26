@@ -41,7 +41,6 @@ export class Models {
             newModel.updateMatrix();
             newModel.castShadow = true;
             _this.snailModels.push(newModel); // push to snailModels array
-            console.log(this.snailModels);
             _this.loadComplete(); // call on model loaded, userfeedback
         }, false);
         loader.load(snail.pathObj, snail.pathMtl);

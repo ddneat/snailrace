@@ -4,7 +4,7 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function FloorController(createCaption, floor_width, floor_height, finPosZ, scene){
+function FloorController(game, floor_width, floor_height, finPosZ, scene){
 	// floor constuctor
 	function floor(textureName, size, posCenter, correctionY, opacity, repeatValue){
 		this.textureName = textureName;
@@ -79,7 +79,7 @@ function FloorController(createCaption, floor_width, floor_height, finPosZ, scen
 
 		// create 1-4 start-caption
 		for(var i = 0; i < trackAmount; i++){
-			createCaption(i + 1, fontheight, fontsize,
+			game.createCaption(i + 1, fontheight, fontsize,
 				position = { x: trackWidth * i + trackWidth / 2, y: 0, z: 1 },
 				rotation = { x: - Math.PI / 2, y: 0, z: 0 },
 				0xFFFFFF, 0.9, "trackCaption" + i, lambert = true,
