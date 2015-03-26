@@ -4,7 +4,7 @@ export class Game {
 
     constructor(options) {
         this.isGameOver = false;
-        this.playerSnails = options.playerSnails;
+        this.playerSnails = {snails: []};
         this.particles = [];
         this.scene = new THREE.Scene();
         this.camera = options.camera;

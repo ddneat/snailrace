@@ -6,14 +6,12 @@ var Game = require("./modules/Game.js").Game;
 var SCREEN_WIDTH = window.innerWidth,
     SCREEN_HEIGHT = window.innerHeight;
 
-var playerSnails = { snails: [] };
-
 // global variables
 var camera = new THREE.PerspectiveCamera(45, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 100000),
     playerCount = 2;
 var controls;
 
-var game = new Game({ camera: camera, playerSnails: playerSnails, playerCount: playerCount });
+var game = new Game({ camera: camera, playerCount: playerCount });
 
 $(game).on("game_over", function () {
 	removeControls();
@@ -153,7 +151,7 @@ var Game = exports.Game = (function () {
         _classCallCheck(this, Game);
 
         this.isGameOver = false;
-        this.playerSnails = options.playerSnails;
+        this.playerSnails = { snails: [] };
         this.particles = [];
         this.scene = new THREE.Scene();
         this.camera = options.camera;
