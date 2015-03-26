@@ -29,7 +29,7 @@ var render = function render() {
 
 			view = views[k];
 			camera = view.camera;
-			view.updateCamera(camera, scene);
+			view.updateCamera(camera, game.scene);
 
 			var left = Math.floor(SCREEN_WIDTH * view.left);
 			var bottom = Math.floor(SCREEN_HEIGHT * view.bottom);
@@ -42,20 +42,19 @@ var render = function render() {
 			camera.aspect = width / height;
 			camera.updateProjectionMatrix();
 
-			renderer.render(scene, camera);
+			renderer.render(game.scene, camera);
 		}
 	}
 
 	// render scene
-	if (!game.isGameOver) renderer.render(scene, camera);
+	if (!game.isGameOver) renderer.render(game.scene, camera);
 	// render-loop
 	animationFrameID = requestAnimationFrame(function () {
 		render();
 	});
 };
 
-var scene = new THREE.Scene();
-var game = new Game({ scene: scene, camera: camera, render: render, playerSnails: playerSnails, playerCount: playerCount });
+var game = new Game({ camera: camera, render: render, playerSnails: playerSnails, playerCount: playerCount });
 
 $(game).on("game_over", function () {
 	removeControls();
@@ -148,19 +147,19 @@ function init() {
 	container.appendChild(renderer.domElement);
 
 	// create scene object, add fog to scene
-	scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
+	game.scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
 
 	// camera viewport and configuration, PerspectiveCamera(angle, aspect, near, far)
 	camera.position.set(10, 10, 10); // set position of the camera
 	camera.lastPosition = new THREE.Vector3(10, 10, 10);
 	camera.lookAt(new THREE.Vector3(0, 0, 0)); // scene point camera is looking at
-	scene.add(camera); // add camera to scene
+	game.scene.add(camera); // add camera to scene
 	//camera for finish screen
 	cameraFinish = new THREE.PerspectiveCamera(45, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 100000);
 	cameraFinish.position.set(10, 10, 10); // set position of the camera
 	cameraFinish.lastPosition = new THREE.Vector3(10, 10, 10);
 	cameraFinish.lookAt(new THREE.Vector3(0, 0, 0)); // scene point camera is looking at
-	scene.add(cameraFinish); // add camera to scene
+	game.scene.add(cameraFinish); // add camera to scene
 
 	//views for different viewports at finish
 	views = [{
@@ -170,7 +169,7 @@ function init() {
 		height: 1,
 		eye: [10, 10, 10], //x,y,z position of camera
 		up: [0, 1, 0], //up vector
-		updateCamera: function updateCamera(camera, scene) {
+		updateCamera: function updateCamera(camera) {
 			camera.position = camera.lastPosition;
 			camera.lookAt(camera.target);
 		}
@@ -181,7 +180,7 @@ function init() {
 		height: 0.4,
 		eye: [0, 10, 0],
 		up: [0, 0, 1],
-		updateCamera: function updateCamera(camera, scene) {
+		updateCamera: function updateCamera(camera) {
 			// camera.position.set(0,4, playerSnails[winner].position.z-10);
 
 			camera.position.x = camera.position.x * Math.cos(0.1) + Math.sin(0.1);
@@ -197,7 +196,7 @@ function init() {
 	// point light, THREE.PointLight(color, density)
 	var PointLight = new THREE.PointLight(16777215, 0.2);
 	PointLight.position.set(10, 20, -40); // set position of light
-	scene.add(PointLight); // add light to scene
+	game.scene.add(PointLight); // add light to scene
 
 	// directional light, THREE.DirectionalLight(color, density)
 	var directionalLight = new THREE.DirectionalLight(16777215, 1);
@@ -212,7 +211,7 @@ function init() {
 	directionalLight.shadowCameraFar = 60;
 	// enable light is casting shadow
 	directionalLight.castShadow = true;
-	scene.add(directionalLight); // add light to scene
+	game.scene.add(directionalLight); // add light to scene
 
 	// dev-cam, free-cam
 	controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -225,7 +224,7 @@ function init() {
 	    finPosZ = 23;
 
 	// create floors
-	FC = new FloorController(game, floor_width, floor_height, finPosZ, scene);
+	FC = new FloorController(game, floor_width, floor_height, finPosZ, game.scene);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(renderer, camera);
@@ -258,7 +257,7 @@ var Game = exports.Game = (function () {
         this.isGameOver = false;
         this.playerSnails = options.playerSnails;
         this.particles = [];
-        this.scene = options.scene;
+        this.scene = new THREE.Scene();
         this.camera = options.camera;
         this.render = options.render;
         this.startTime;
@@ -288,7 +287,6 @@ var Game = exports.Game = (function () {
         },
         addParticleSystem: {
             value: function addParticleSystem(index) {
-                console.log("addParticleSytem");
                 var materials = [],
                     size;
                 size = 0.1; // size of particle
@@ -490,7 +488,6 @@ var Game = exports.Game = (function () {
                             setTimeout(loop, 1000); // recall loop after 0.1 second
                         } else {
                             _this.startTime = new Date().getTime();
-                            console.log(_this.startTime);
                             text = "GO!", color = 52224;
                             // enable user controller
                             _this.addUserInput();
@@ -645,7 +642,6 @@ var Models = exports.Models = (function () {
                 var floor_width = 10;
                 var trackWidth = floor_width / 4;
                 var newModel = this.snailModels[playerNumber].clone();
-                console.log("yyyy");
                 newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
                 this.playerSnails.snails.push(newModel);
                 this.playerSnails.snails[playerNumber].slimeCounter = 0;
@@ -686,7 +682,6 @@ var Models = exports.Models = (function () {
         loadComplete: {
             value: function loadComplete() {
                 this.modelsToLoad--;
-                console.log(this.modelsToLoad, "models to load");
                 if (this.modelsToLoad <= 0) {
                     // game ready to start, remove loading bar
                     document.getElementById("loadingBar").style.display = "none";

@@ -56,7 +56,6 @@ export class Models {
         var  floor_width = 10;
         var trackWidth = floor_width / 4;
         var newModel = this.snailModels[playerNumber].clone();
-        console.log('yyyy');
         newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
         this.playerSnails.snails.push(newModel);
         this.playerSnails.snails[playerNumber].slimeCounter = 0;
@@ -94,7 +93,6 @@ export class Models {
 
     loadComplete(){
         this.modelsToLoad--;
-        console.log(this.modelsToLoad, "models to load");
         if(this.modelsToLoad <= 0){ // game ready to start, remove loading bar
             document.getElementById("loadingBar").style.display = "none";
             // enable start game

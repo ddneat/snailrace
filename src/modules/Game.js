@@ -6,7 +6,7 @@ export class Game {
         this.isGameOver = false;
         this.playerSnails = options.playerSnails;
         this.particles = [];
-        this.scene = options.scene;
+        this.scene = new THREE.Scene();
         this.camera = options.camera;
         this.render = options.render;
         this.startTime;
@@ -32,7 +32,6 @@ export class Game {
     }
 
     addParticleSystem(index){
-        console.log('addParticleSytem');
         var materials = [], size;
         size  = 0.1; // size of particle
         var x = this.playerSnails.snails[index].position.x;
@@ -209,7 +208,6 @@ export class Game {
                 }
                 else{
                     _this.startTime = new Date().getTime();
-                    console.log(_this.startTime);
                     text = "GO!", color = 0x00CC00;
                     // enable user controller
                     _this.addUserInput();

@@ -4,7 +4,7 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function FloorController(game, floor_width, floor_height, finPosZ, scene){
+function FloorController(game, floor_width, floor_height, finPosZ){
 	// floor constuctor
 	function floor(textureName, size, posCenter, correctionY, opacity, repeatValue){
 		this.textureName = textureName;
@@ -44,7 +44,7 @@ function FloorController(game, floor_width, floor_height, finPosZ, scene){
 		// !! y an z swaped, because of rotation !!
 		newObject.position = { x: floor.posCenter.x, y: floor.correctionY, z: - floor.posCenter.y };
 		// add floor to scene
-		scene.add(newObject);
+		game.scene.add(newObject);
 	};
 
 	function createTrackCaption(){
