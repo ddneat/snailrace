@@ -8,12 +8,6 @@ var controls;
 
 var game = new Game({camera: camera, playerCount: playerCount});
 
-$(game).on('game_over', function() {
-    removeControls();
-});
-
-
-
 
 window.onload = function(){
 	//if(animationFrameID){
@@ -116,24 +110,8 @@ function init(){
 
 	// dev-cam, free-cam
 	controls = new THREE.TrackballControls( camera, game.renderer.domElement );
-	
-	//game parameters
-	var FC, floor_width = 10, floor_height = 30, snailSpeed = 0.9, finPosZ = 23;
 
-	// create floors
-	FC = new FloorController(game, floor_width, floor_height, finPosZ, game.scene);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(game.renderer, camera);
 }
-
-
-
-
-
-var removeControls = function() {
-    // keep movement for 3 seconds enabled
-    setTimeout(function(){
-        window.removeEventListener('keyup', game.checkModelMove, false);
-    }, 3000);
-};

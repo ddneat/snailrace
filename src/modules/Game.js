@@ -1,8 +1,18 @@
 import { Models } from './Models.js';
+import { Environment } from './Environment.js';
 
 export class Game {
 
     constructor(options) {
+
+        this.config = {
+            floor_width: 10,
+            floor_height: 30,
+            snailSpeed: 0.9,
+            finPosZ: 23
+        };
+
+
         this.isGameOver = false;
         this.playerSnails = {snails: []};
         this.particles = [];
@@ -14,6 +24,8 @@ export class Game {
         this.winner = 0;
         this.playerCount = options.playerCount;
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
+
+        this.environment = new Environment(this, this.config.floor_width, this.config.floor_height, this.config.finPosZ);
 
         this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100000);
 
@@ -280,10 +292,10 @@ export class Game {
                 _this.scene.remove(_this.scene.getChildByName(objName));
                 // add new caption
                 _this.createCaption(text, fontheight, fontsize,
-                    position = { x: -1, y: 2.1, z: -2 },
-                    rotation = { x: 0, y: Math.PI / 2, z: 0 },
-                    color, 1, objName, lambert = true,
-                    shadow = { receiveShadow: true, castShadow: true });
+                    { x: -1, y: 2.1, z: -2 },
+                    { x: 0, y: Math.PI / 2, z: 0 },
+                    color, 1, objName, true,
+                    { receiveShadow: true, castShadow: true });
                 // this.gameStart = new date.timestamp
             })();
         }
@@ -335,12 +347,20 @@ export class Game {
         //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
     }
 
+    removeControls() {
+        // keep movement for 3 seconds enabled
+        var _this = this;
+        setTimeout(function(){
+            window.removeEventListener('keyup', _this.checkModelMove.bind(_this), false);
+        }, 3000);
+    };
+
     setGameOver(winID){
         this.isGameOver = true;
 
         this.winner = winID;
         this.setGameOverScreen(winID);
-        $(this).trigger('game_over');
+        this.removeControls();
     }
 
     render(){

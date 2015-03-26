@@ -13,10 +13,6 @@ var controls;
 
 var game = new Game({ camera: camera, playerCount: playerCount });
 
-$(game).on("game_over", function () {
-	removeControls();
-});
-
 window.onload = function () {
 	//if(animationFrameID){
 	//	cancelAnimationFrame(animationFrameID);
@@ -112,28 +108,131 @@ function init() {
 	// dev-cam, free-cam
 	controls = new THREE.TrackballControls(camera, game.renderer.domElement);
 
-	//game parameters
-	var FC,
-	    floor_width = 10,
-	    floor_height = 30,
-	    snailSpeed = 0.9,
-	    finPosZ = 23;
-
-	// create floors
-	FC = new FloorController(game, floor_width, floor_height, finPosZ, game.scene);
-
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(game.renderer, camera);
 }
 
-var removeControls = function removeControls() {
-	// keep movement for 3 seconds enabled
-	setTimeout(function () {
-		window.removeEventListener("keyup", game.checkModelMove, false);
-	}, 3000);
+},{"./modules/Game.js":4}],2:[function(require,module,exports){
+"use strict";
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Floor = require("./Floor.js").Floor;
+
+var Environment = exports.Environment = function Environment(game, floor_width, floor_height, finPosZ) {
+    _classCallCheck(this, Environment);
+
+    // soil floor
+    var soilSize = { width: floor_height * 20, height: floor_height * 20 };
+    var soilPivotCenter = { x: 0, y: 0, z: 0 };
+    var soil = new Floor(game.scene, "gras.jpg", soilSize, soilPivotCenter, -0.01, 1, { x: soilSize.width / 5, y: soilSize.height / 5 });
+    soil.addPlaneToScene();
+
+    // track floor
+    var trackSize = { width: floor_width, height: floor_height };
+    var trackPivotCenter = { x: trackSize.width / 2, y: trackSize.height / 2 - 3, z: 0 };
+    var track = new Floor(game.scene, "floor_comic.jpg", trackSize, trackPivotCenter, 0, 1, { x: trackSize.width / 5, y: trackSize.height / 5 });
+    track.addPlaneToScene();
+
+    // add start and finish-lines
+    var opacity = 0.7,
+        linePivotCenter,
+        lineSize = { width: floor_width, height: 0.3 };
+    // start: front snale
+    linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 - 3, z: 0 };
+    var startCaptionFront = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
+    startCaptionFront.addPlaneToScene();
+    // start: behind snail
+    linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 + 1, z: 0 };
+    var startCaptionBehind = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
+    startCaptionBehind.addPlaneToScene();
+
+    // finish
+    linePivotCenter = { x: lineSize.width / 2, y: finPosZ, z: 0 };
+    var finishLine = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
+    finishLine.addPlaneToScene();
+
+    // line behind finisharea
+    var finishAreaDeepth = 4;
+    linePivotCenter = { x: lineSize.width / 2, y: finPosZ + finishAreaDeepth, z: 0 };
+    var finishLine = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
+    finishLine.addPlaneToScene();
+
+    var trackAmount = 4,
+        trackWidth = floor_width / trackAmount,
+        fontheight = 0.01,
+        fontsize = 1;
+
+    // create 1-4 start-caption
+    for (var i = 0; i < trackAmount; i++) {
+        game.createCaption(i + 1, fontheight, fontsize, { x: trackWidth * i + trackWidth / 2, y: 0, z: 1 }, { x: -Math.PI / 2, y: 0, z: 0 }, 16777215, 0.9, "trackCaption" + i, true, { receiveShadow: true, castShadow: false });
+    }
 };
 
-},{"./modules/Game.js":2}],2:[function(require,module,exports){
+},{"./Floor.js":3}],3:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Floor = exports.Floor = (function () {
+    function Floor(scene, textureName, size, posCenter, correctionY, opacity, repeatValue) {
+        _classCallCheck(this, Floor);
+
+        this.scene = scene;
+        this.textureName = textureName;
+        this.size = size;
+        this.posCenter = posCenter;
+        this.correctionY = correctionY;
+        this.opacity = opacity;
+        this.repeatValue = repeatValue;
+    }
+
+    _createClass(Floor, {
+        addPlaneToScene: {
+            value: function addPlaneToScene() {
+
+                var newObjectGeometry = new THREE.PlaneGeometry(this.size.width, this.size.height, 0); //width, height, segments
+                var newObjectTexture, newObjectMaterial;
+
+                if (this.textureName != "") {
+                    // if texture is set
+                    newObjectTexture = THREE.ImageUtils.loadTexture("img/" + this.textureName);
+                    // set texture properties, repeat
+                    newObjectTexture.wrapS = newObjectTexture.wrapT = THREE.RepeatWrapping;
+                    newObjectTexture.repeat.set(this.repeatValue.x, this.repeatValue.y); //x-repeat, y-repeat
+                    newObjectMaterial = new THREE.MeshLambertMaterial({ map: newObjectTexture, transparent: true, opacity: this.opacity });
+                } else {
+                    newObjectMaterial = new THREE.MeshLambertMaterial({ color: "#fff", transparent: true, opacity: this.opacity });
+                }
+                // create new mesh from geometry and material
+                var newObject = new THREE.Mesh(newObjectGeometry, newObjectMaterial);
+                newObject.material.side = THREE.DoubleSide; // set object to doublesided
+                newObject.receiveShadow = true; // set receaving shadow
+                // rotate floor to x-z
+                newObject.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+                // set position of floor
+                // !! y an z swaped, because of rotation !!
+                newObject.position = { x: this.posCenter.x, y: this.correctionY, z: -this.posCenter.y };
+                // add floor to scene
+                this.scene.add(newObject);
+            }
+        }
+    });
+
+    return Floor;
+})();
+
+},{}],4:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -146,9 +245,18 @@ Object.defineProperty(exports, "__esModule", {
 
 var Models = require("./Models.js").Models;
 
+var Environment = require("./Environment.js").Environment;
+
 var Game = exports.Game = (function () {
     function Game(options) {
         _classCallCheck(this, Game);
+
+        this.config = {
+            floor_width: 10,
+            floor_height: 30,
+            snailSpeed: 0.9,
+            finPosZ: 23
+        };
 
         this.isGameOver = false;
         this.playerSnails = { snails: [] };
@@ -161,6 +269,8 @@ var Game = exports.Game = (function () {
         this.winner = 0;
         this.playerCount = options.playerCount;
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
+
+        this.environment = new Environment(this, this.config.floor_width, this.config.floor_height, this.config.finPosZ);
 
         this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
 
@@ -449,7 +559,7 @@ var Game = exports.Game = (function () {
                         // remove old caption
                         _this.scene.remove(_this.scene.getChildByName(objName));
                         // add new caption
-                        _this.createCaption(text, fontheight, fontsize, position = { x: -1, y: 2.1, z: -2 }, rotation = { x: 0, y: Math.PI / 2, z: 0 }, color, 1, objName, lambert = true, shadow = { receiveShadow: true, castShadow: true });
+                        _this.createCaption(text, fontheight, fontsize, { x: -1, y: 2.1, z: -2 }, { x: 0, y: Math.PI / 2, z: 0 }, color, 1, objName, true, { receiveShadow: true, castShadow: true });
                         // this.gameStart = new date.timestamp
                     })();
                 }
@@ -505,13 +615,22 @@ var Game = exports.Game = (function () {
                 //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
             }
         },
+        removeControls: {
+            value: function removeControls() {
+                // keep movement for 3 seconds enabled
+                var _this = this;
+                setTimeout(function () {
+                    window.removeEventListener("keyup", _this.checkModelMove.bind(_this), false);
+                }, 3000);
+            }
+        },
         setGameOver: {
             value: function setGameOver(winID) {
                 this.isGameOver = true;
 
                 this.winner = winID;
                 this.setGameOverScreen(winID);
-                $(this).trigger("game_over");
+                this.removeControls();
             }
         },
         render: {
@@ -554,7 +673,7 @@ var Game = exports.Game = (function () {
     return Game;
 })();
 
-},{"./Models.js":3}],3:[function(require,module,exports){
+},{"./Environment.js":2,"./Models.js":5}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
