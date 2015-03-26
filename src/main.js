@@ -1,25 +1,30 @@
 import { Game } from './modules/Game.js';
+import { Models } from './modules/Models.js';
 
+
+
+var playerSnails = {snails: []};
+
+// global variables
+var camera, cameraFinish, playerCount = 2, winner = 0;
+var controls, devCam = false, particles = {particles: []};
+
+
+var scene = new THREE.Scene();
 var game = new Game();
+var models = new Models({ scene: scene, playerSnails: playerSnails });
+
+$(game).on('game_over', function() {
+    removeControls();
+});
 
 // main only
 var renderer;
 var views;
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 var animationFrameID = null;
+var GC;
 
-// global variables
-var scene, camera, cameraFinish, playerSnails = {snails: []}, playerCount = 2, winner = 0;
-var controls, devCam = false, particles = [];
-//slime textures
-var slimeTexture = THREE.ImageUtils.loadTexture('img/slime.png');
-			// set texture properties, repeat
-			slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-			slimeTexture.repeat.set(1, 1);
-var slimeTextureBegin = THREE.ImageUtils.loadTexture('img/slimeBegin.png');
-			// set texture properties, repeat
-			slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-			slimeTextureBegin.repeat.set(1, 1);
 
 
 window.onload = function(){
@@ -29,6 +34,16 @@ window.onload = function(){
 	parseLocalStorageData();
 	showSettings();
 	init();
+
+
+    var startBtn = document.getElementById("startgame");
+    startBtn.addEventListener('click', function(){
+        console.log(GC);
+        models.setPlayerSnails(playerCount);
+        GC.startGame();
+    }, false);
+
+
 };
 //loads the values from the local storage and writes it to the screen
 function parseLocalStorageData(){
@@ -99,7 +114,6 @@ function init(){
 	container.appendChild( renderer.domElement );
 
 	// create scene object, add fog to scene
-	scene = new THREE.Scene();
 	scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
 	
 	// camera viewport and configuration, PerspectiveCamera(angle, aspect, near, far)
@@ -176,16 +190,13 @@ function init(){
 	controls = new THREE.TrackballControls( camera, renderer.domElement );
 	
 	//game parameters
-	var FC, MC, GC, floor_width = 10, floor_height = 30, snailSpeed = 0.9, finPosZ = 23;
+	var FC, floor_width = 10, floor_height = 30, snailSpeed = 0.9, finPosZ = 23;
 
 	// create floors
 	FC = new FloorController(createCaption, floor_width, floor_height, finPosZ, scene);
 
-	// load snail and flag models
-    console.log(playerSnails);
-	MC = new ModelController(scene, finPosZ, floor_width, floor_height, playerSnails);
 	// create gameController
-	GC = new GameController(FC, MC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, playerCount, slimeTexture, slimeTextureBegin, devCam, camera, game, cameraFinish);
+	GC = new GameController(FC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, devCam, camera, game, cameraFinish);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(renderer, camera);
@@ -218,15 +229,22 @@ function createCaption(text, height, size, position, rotation, color, opacity, n
 //animates the particle system
 function animateParticleSystem(){
 	
-	for (var i = 0; i < particles.length; i++) {
-		if(particles[i].position.y < -1){
-			particles[i].position.y = 1;
+	for (var i = 0; i < particles.particles.length; i++) {
+		if(particles.particles[i].position.y < -1){
+			particles.particles[i].position.y = 1;
 		}
-		particles[i].position.y -= 0.1*Math.random();
+		particles.particles[i].position.y -= 0.1*Math.random();
 	}
 }
 
+var removeControls = function() {
+    // keep movement for 3 seconds enabled
+    setTimeout(function(){
+        window.removeEventListener('keyup', GC.checkModelMove, false);
+    }, 3000);
+};
 
+var view = null;
 var render = function render(){
     //free cam
     if(devCam){

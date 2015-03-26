@@ -3,7 +3,26 @@
 
 var Game = require("./modules/Game.js").Game;
 
+var Models = require("./modules/Models.js").Models;
+
+var playerSnails = { snails: [] };
+
+// global variables
+var camera,
+    cameraFinish,
+    playerCount = 2,
+    winner = 0;
+var controls,
+    devCam = false,
+    particles = { particles: [] };
+
+var scene = new THREE.Scene();
 var game = new Game();
+var models = new Models({ scene: scene, playerSnails: playerSnails });
+
+$(game).on("game_over", function () {
+	removeControls();
+});
 
 // main only
 var renderer;
@@ -11,26 +30,7 @@ var views;
 var SCREEN_WIDTH = window.innerWidth,
     SCREEN_HEIGHT = window.innerHeight;
 var animationFrameID = null;
-
-// global variables
-var scene,
-    camera,
-    cameraFinish,
-    playerSnails = { snails: [] },
-    playerCount = 2,
-    winner = 0;
-var controls,
-    devCam = false,
-    particles = [];
-//slime textures
-var slimeTexture = THREE.ImageUtils.loadTexture("img/slime.png");
-// set texture properties, repeat
-slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-slimeTexture.repeat.set(1, 1);
-var slimeTextureBegin = THREE.ImageUtils.loadTexture("img/slimeBegin.png");
-// set texture properties, repeat
-slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-slimeTextureBegin.repeat.set(1, 1);
+var GC;
 
 window.onload = function () {
 	if (animationFrameID) {
@@ -39,6 +39,13 @@ window.onload = function () {
 	parseLocalStorageData();
 	showSettings();
 	init();
+
+	var startBtn = document.getElementById("startgame");
+	startBtn.addEventListener("click", function () {
+		console.log(GC);
+		models.setPlayerSnails(playerCount);
+		GC.startGame();
+	}, false);
 };
 //loads the values from the local storage and writes it to the screen
 function parseLocalStorageData() {
@@ -108,7 +115,6 @@ function init() {
 	container.appendChild(renderer.domElement);
 
 	// create scene object, add fog to scene
-	scene = new THREE.Scene();
 	scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
 
 	// camera viewport and configuration, PerspectiveCamera(angle, aspect, near, far)
@@ -181,8 +187,6 @@ function init() {
 
 	//game parameters
 	var FC,
-	    MC,
-	    GC,
 	    floor_width = 10,
 	    floor_height = 30,
 	    snailSpeed = 0.9,
@@ -191,11 +195,8 @@ function init() {
 	// create floors
 	FC = new FloorController(createCaption, floor_width, floor_height, finPosZ, scene);
 
-	// load snail and flag models
-	console.log(playerSnails);
-	MC = new ModelController(scene, finPosZ, floor_width, floor_height, playerSnails);
 	// create gameController
-	GC = new GameController(FC, MC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, playerCount, slimeTexture, slimeTextureBegin, devCam, camera, game, cameraFinish);
+	GC = new GameController(FC, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, devCam, camera, game, cameraFinish);
 
 	// handling window-resize, 100% height and 100% width
 	THREEx.WindowResize(renderer, camera);
@@ -227,14 +228,22 @@ function createCaption(text, height, size, position, rotation, color, opacity, n
 //animates the particle system
 function animateParticleSystem() {
 
-	for (var i = 0; i < particles.length; i++) {
-		if (particles[i].position.y < -1) {
-			particles[i].position.y = 1;
+	for (var i = 0; i < particles.particles.length; i++) {
+		if (particles.particles[i].position.y < -1) {
+			particles.particles[i].position.y = 1;
 		}
-		particles[i].position.y -= 0.1 * Math.random();
+		particles.particles[i].position.y -= 0.1 * Math.random();
 	}
 }
 
+var removeControls = function removeControls() {
+	// keep movement for 3 seconds enabled
+	setTimeout(function () {
+		window.removeEventListener("keyup", GC.checkModelMove, false);
+	}, 3000);
+};
+
+var view = null;
 var render = function render() {
 	//free cam
 	if (devCam) {
@@ -273,7 +282,7 @@ var render = function render() {
 	});
 };
 
-},{"./modules/Game.js":2}],2:[function(require,module,exports){
+},{"./modules/Game.js":2,"./modules/Models.js":3}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -315,14 +324,6 @@ var Game = exports.Game = (function () {
                 return endTime;
             }
         },
-        removeControls: {
-            value: function removeControls() {
-                // keep movement for 3 seconds enabled
-                setTimeout(function () {
-                    window.removeEventListener("keyup", checkModelMove, false);
-                }, 3000);
-            }
-        },
         renderChampionText: {
             value: function renderChampionText(winID) {
                 // render message in webgl
@@ -331,6 +332,41 @@ var Game = exports.Game = (function () {
                     fontsize = 1.8,
                     color = 16777215;
                 createCaption("CHAMPION 4EVER", fontheight, fontsize, { x: floor_width / 4 * winID + 1.3, y: 0, z: -12 }, { x: -Math.PI / 2, y: 0, z: Math.PI / 2 }, color, 0.9, objName, true, true);
+            }
+        },
+        addParticleSystem: {
+            value: function addParticleSystem(index) {
+                console.log("addParticleSytem");
+                var materials = [],
+                    size;
+                size = 0.1; // size of particle
+                var x = playerSnails.snails[index].position.x;
+
+                for (var i = 0; i < 15; i++) {
+                    var geometry = new THREE.Geometry();
+                    // add particle to particle system
+                    var amount = 1200;
+                    for (var j = 0; j < amount; j++) {
+
+                        var vertex = new THREE.Vector3();
+                        vertex.x = Math.random() * 2 - 1;
+                        vertex.y = Math.random() * 15 - 1;
+                        vertex.z = Math.random() * 30 - 1;
+                        vertex.velocity = new THREE.Vector3(0, -1, 0);
+                        geometry.vertices.push(vertex);
+                    }
+
+                    materials[i] = new THREE.ParticleBasicMaterial({ size: size });
+                    var randomColor = "#000000".replace(/0/g, function () {
+                        return (~ ~(Math.random() * 16)).toString(16);
+                    });
+                    materials[i].color = new THREE.Color(randomColor);
+                    particles.particles[i] = new THREE.ParticleSystem(geometry, materials[i]);
+                    particles.particles[i].position.set(x, 1, -26);
+                    particles.particles[i].sortPosition = true;
+
+                    scene.add(particles.particles[i]);
+                }
             }
         },
         setGameOverScreen: {
@@ -349,12 +385,145 @@ var Game = exports.Game = (function () {
 
                 winner = winID;
                 this.setGameOverScreen(winID);
-                this.removeControls();
+                $(this).trigger("game_over");
             }
         }
     });
 
     return Game;
+})();
+
+},{}],3:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Models = exports.Models = (function () {
+    function Models(options) {
+        _classCallCheck(this, Models);
+
+        this.modelsToLoad = 0;
+        this.snailModels = [];
+        this.playerSnails = options.playerSnails;
+        this.scene = options.scene;
+
+        // load flag-model
+        this.loadFlag();
+
+        // load different snail-models
+        this.loadSnail(new this.snail("snailmodelRed"));
+        this.loadSnail(new this.snail("snailmodelBlue"));
+        this.loadSnail(new this.snail("snailmodelGreen"));
+        this.loadSnail(new this.snail("snailmodelYellow"));
+    }
+
+    _createClass(Models, {
+        snail: {
+            value: function snail(filename) {
+                this.pathObj = "models/" + filename + ".obj";
+                this.pathMtl = "models/" + filename + ".mtl";
+                this.position = { x: 0, y: 0, z: 0 };
+            }
+        },
+        loadSnail: {
+            value: function loadSnail(snail) {
+                var newModel,
+                    trackAmount = 4;
+                // calculate single track-width
+                var floor_width = 10;
+                var trackWidth = floor_width / trackAmount;
+                // count up modelsToLoad
+                this.modelsToLoad++;
+                var loader = new THREE.OBJMTLLoader();
+                var _this = this;
+
+                loader.addEventListener("load", function (event) {
+                    newModel = event.content;
+                    newModel.traverse(function (child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.castShadow = true;
+                        }
+                    });
+                    newModel.updateMatrix();
+                    newModel.castShadow = true;
+                    _this.snailModels.push(newModel); // push to snailModels array
+                    console.log(this.snailModels);
+                    _this.loadComplete(); // call on model loaded, userfeedback
+                }, false);
+                loader.load(snail.pathObj, snail.pathMtl);
+            }
+        },
+        setPlayerSnails: {
+            value: function setPlayerSnails(playerCount) {
+                for (var i = 0; i < playerCount; i++) {
+                    this.setSingleSnail(i);
+                }
+            }
+        },
+        setSingleSnail: {
+            value: function setSingleSnail(playerNumber) {
+                var floor_width = 10;
+                var trackWidth = floor_width / 4;
+                var newModel = this.snailModels[playerNumber].clone();
+                console.log("yyyy");
+                newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
+                this.playerSnails.snails.push(newModel);
+                this.playerSnails.snails[playerNumber].slimeCounter = 0;
+                this.scene.add(newModel);
+            }
+        },
+        loadFlag: {
+            value: function loadFlag() {
+                var newModel,
+                    trackAmount = 4;
+                // calculate single track-width
+                var floor_width = 10;
+                var trackWidth = floor_width / trackAmount;
+                // count up modelsToLoad
+                this.modelsToLoad++;
+                var finPosZ = 23;
+
+                var _this = this;
+
+                var loader = new THREE.OBJMTLLoader();
+                loader.addEventListener("load", function (event) {
+                    newModel = event.content;
+                    newModel.traverse(function (child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.castShadow = true;
+                        }
+                    });
+                    newModel.updateMatrix();
+                    newModel.scale.set(0.1, 0.1, 0.1);
+                    newModel.position.x = trackWidth * trackAmount / 2;
+                    newModel.position.z = -finPosZ;
+                    _this.scene.add(newModel);
+                    _this.loadComplete();
+                }, false);
+                loader.load("models/flag.obj", "models/flag.mtl");
+            }
+        },
+        loadComplete: {
+            value: function loadComplete() {
+                this.modelsToLoad--;
+                console.log(this.modelsToLoad, "models to load");
+                if (this.modelsToLoad <= 0) {
+                    // game ready to start, remove loading bar
+                    document.getElementById("loadingBar").style.display = "none";
+                    // enable start game
+                    $("#startgame").removeAttr("disabled").removeClass("btn-disabled");
+                }
+            }
+        }
+    });
+
+    return Models;
 })();
 
 },{}]},{},[1]);

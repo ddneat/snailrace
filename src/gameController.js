@@ -4,16 +4,24 @@ by David Neubauer and Joscha Probst
 University of Applied Sciences Salzburg
 ********************************/
 
-function GameController(floorController, modelController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, playerCount, slimeTexture, slimeTextureBegin, devCam, camera, game, cameraFinish){
-	var startBtn = document.getElementById("startgame");
+function GameController(floorController, createCaption, finPosZ, floor_width, floor_height, snailSpeed, particles, scene, render, playerSnails, devCam, camera, game, cameraFinish){
+
     var startTime;
     var endTime;
-	startBtn.addEventListener('click', startGame, false);
+
+
+    var slimeTexture = THREE.ImageUtils.loadTexture('img/slime.png');
+    // set texture properties, repeat
+    slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
+    slimeTexture.repeat.set(1, 1);
+    var slimeTextureBegin = THREE.ImageUtils.loadTexture('img/slimeBegin.png');
+    // set texture properties, repeat
+    slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
+    slimeTextureBegin.repeat.set(1, 1);
 
 	function startGame(){
-        console.log('start game', modelController);
 		// set snails, depending on playerCount selected
-		modelController.setPlayerSnails(playerCount);
+
 		// hide lobby with slide effect, duration 1 second
 		$('#lobbyContainer').hide("slide", {direction:"up", easing: 'easeInCubic'}, 1000 );
 		// objname = needed for select from scene.children
@@ -50,26 +58,10 @@ function GameController(floorController, modelController, createCaption, finPosZ
 	function addUserInput(){
 		window.addEventListener('keyup', checkModelMove, false);
 	}
-	//user input
-	function checkModelMove(e){
-	    if (e.keyCode == 81 || e.which == 81){//81 =q
-	    	modelMove(0);
-	    }
-	    else if (e.keyCode == 67 || e.which == 67){// 67 = c
-	    	modelMove(1);
-	    }
-	    else if (e.keyCode == 78 || e.which == 78){// 78 = n
-	    	modelMove(2);
-	    }
-	    else if (e.keyCode == 80 || e.which == 80){// 80 = p
-	    	modelMove(3);
-	    }
-	}
 	//moves models on the scene
 	function modelMove(snailIndex){
 		// set new position of snail
 		// into negativ z-axis
-        console.log(playerSnails);
 		playerSnails.snails[snailIndex].position.z -= snailSpeed;
 		addSlime();
 		// if devCam is not enabled, set camera to new position
@@ -78,7 +70,7 @@ function GameController(floorController, modelController, createCaption, finPosZ
 		// check if user reached finish
 		var halfmodel = 1.3; // model-pivot is center, with halfmodel -> head
 		if(Math.abs(playerSnails.snails[snailIndex].position.z - halfmodel) >= finPosZ && !game.isGameOver)
-			setGameOver(snailIndex);
+			game.setGameOver(snailIndex);
 		//camera movement
 		function setCameraInGame(){
 			var position = getFirstAndLastSnailPositionZ();
@@ -126,32 +118,6 @@ function GameController(floorController, modelController, createCaption, finPosZ
 		}
 	}
 
-	function setGameOver(winID){
-		gameOver = true;
-		winner = winID;
-		endTime = (new Date().getTime() - startTime) /1000;//highscore-time
-		endTime.toFixed(3);
-		gameOverScreen(endTime);
-		console.log("snail on track" + (winID+1) + " won");
-		// render message in webgl
-		var text = "CHAMPION 4EVER";
-		var objName = "winner", fontheight = 0.01, fontsize = 1.8, color = 0xFFFFFF;
-		createCaption(text, fontheight, fontsize,
-			position = { x: floor_width / 4 * winID + 1.3, y: 0, z: -12 },
-			rotation = { x: - Math.PI / 2, y: 0, z: Math.PI / 2 },
-			color, 0.9, objName, lambert = true, shadow = true);
-
-		// add ParticleSystem to scene
-		addParticleSystem(winID);
-
-		cameraFinish.position.set(1,4, playerSnails.snails[winID].position.z-8);
-
-		// keep movement for 3 seconds enabled
-		function removeControlls(){
-			window.removeEventListener('keyup', checkModelMove, false);
-		}
-		setTimeout(removeControlls, 3000);
-	}
 	//name-input for highscore
 	function gameOverScreen(endtime){
 		$('#gameOverInput').show(1200);
@@ -184,33 +150,23 @@ function GameController(floorController, modelController, createCaption, finPosZ
 		}
 	}
 
-	function addParticleSystem(index){
-		var materials = [], size;
-		size  = 0.1; // size of particle
-		var x = playerSnails.snails[index].position.x;
-		
-		for (var i = 0; i < 15; i++) {
-			var geometry = new THREE.Geometry();
-			// add particle to particle system
-			var amount = 1200;
-			for ( var j = 0; j < amount; j ++ ) {
+    function checkModelMove(e){
+        if (e.keyCode == 81 || e.which == 81){//81 =q
+            modelMove(0);
+        }
+        else if (e.keyCode == 67 || e.which == 67){// 67 = c
+            modelMove(1);
+        }
+        else if (e.keyCode == 78 || e.which == 78){// 78 = n
+            modelMove(2);
+        }
+        else if (e.keyCode == 80 || e.which == 80){// 80 = p
+            modelMove(3);
+        }
+    }
 
-				var vertex = new THREE.Vector3();
-				vertex.x = Math.random() * 2 - 1;
-				vertex.y = Math.random() * 15 - 1;
-				vertex.z = Math.random() * 30 - 1;
-				vertex.velocity = new THREE.Vector3(0, -1, 0);
-				geometry.vertices.push( vertex );	
-			}
-
-			materials[i] = new THREE.ParticleBasicMaterial( { size: size } );
-			var randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
-			materials[i].color = new THREE.Color(randomColor);
-			particles[i] = new THREE.ParticleSystem( geometry, materials[i] );
-			particles[i].position.set(x,1,-26);
-			particles[i].sortPosition = true;
-			
-			scene.add(particles[i]);
-		}	
-	}
+    return {
+        checkModelMove: checkModelMove,
+        startGame: startGame
+    }
 }
