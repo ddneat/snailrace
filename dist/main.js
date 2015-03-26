@@ -3,8 +3,6 @@
 
 var Game = require("./modules/Game.js").Game;
 
-var Models = require("./modules/Models.js").Models;
-
 var SCREEN_WIDTH = window.innerWidth,
     SCREEN_HEIGHT = window.innerHeight;
 
@@ -57,8 +55,7 @@ var render = function render() {
 };
 
 var scene = new THREE.Scene();
-var game = new Game({ scene: scene, camera: camera, render: render, playerSnails: playerSnails });
-var models = new Models({ scene: scene, playerSnails: playerSnails });
+var game = new Game({ scene: scene, camera: camera, render: render, playerSnails: playerSnails, playerCount: playerCount });
 
 $(game).on("game_over", function () {
 	removeControls();
@@ -80,7 +77,6 @@ window.onload = function () {
 
 	var startBtn = document.getElementById("startgame");
 	startBtn.addEventListener("click", function () {
-		models.setPlayerSnails(playerCount);
 		game.startGame();
 	}, false);
 };
@@ -242,7 +238,7 @@ var removeControls = function removeControls() {
 	}, 3000);
 };
 
-},{"./modules/Game.js":2,"./modules/Models.js":3}],2:[function(require,module,exports){
+},{"./modules/Game.js":2}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -252,6 +248,8 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var Models = require("./Models.js").Models;
 
 var Game = exports.Game = (function () {
     function Game(options) {
@@ -265,6 +263,8 @@ var Game = exports.Game = (function () {
         this.render = options.render;
         this.startTime;
         this.winner = 0;
+        this.playerCount = options.playerCount;
+        this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
     }
 
     _createClass(Game, {
@@ -467,6 +467,8 @@ var Game = exports.Game = (function () {
         },
         startGame: {
             value: function startGame() {
+
+                this.models.setPlayerSnails(this.playerCount);
                 // set snails, depending on playerCount selected
 
                 // hide lobby with slide effect, duration 1 second
@@ -566,7 +568,7 @@ var Game = exports.Game = (function () {
     return Game;
 })();
 
-},{}],3:[function(require,module,exports){
+},{"./Models.js":3}],3:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();

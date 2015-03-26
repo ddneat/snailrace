@@ -1,5 +1,4 @@
 import { Game } from './modules/Game.js';
-import { Models } from './modules/Models.js';
 
 var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 
@@ -53,8 +52,7 @@ var render = function render(){
 
 
 var scene = new THREE.Scene();
-var game = new Game({scene: scene, camera: camera, render: render, playerSnails: playerSnails});
-var models = new Models({ scene: scene, playerSnails: playerSnails });
+var game = new Game({scene: scene, camera: camera, render: render, playerSnails: playerSnails, playerCount: playerCount});
 
 $(game).on('game_over', function() {
     removeControls();
@@ -79,7 +77,6 @@ window.onload = function(){
 
     var startBtn = document.getElementById("startgame");
     startBtn.addEventListener('click', function(){
-        models.setPlayerSnails(playerCount);
         game.startGame();
     }, false);
 

@@ -1,4 +1,4 @@
-
+import { Models } from './Models.js';
 
 export class Game {
 
@@ -11,6 +11,8 @@ export class Game {
         this.render = options.render;
         this.startTime;
         this.winner = 0;
+        this.playerCount = options.playerCount;
+        this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
     }
 
     getEndTime() {
@@ -188,6 +190,8 @@ export class Game {
     }
 
     startGame(){
+
+        this.models.setPlayerSnails(this.playerCount);
         // set snails, depending on playerCount selected
 
         // hide lobby with slide effect, duration 1 second
