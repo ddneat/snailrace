@@ -691,53 +691,20 @@ var Models = exports.Models = (function () {
         this.modelsToLoad = 0;
         this.snailModels = [];
         this.playerSnails = options.playerSnails;
+        this.sceneModels = [];
         this.scene = options.scene;
 
-        // load flag-model
-        this.loadFlag();
+        var snailScale = { x: 1, y: 1, z: 1 };
+        var snailPosition = { x: 1, y: 0, z: 1 };
+        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
+        this.loadModel(this.snailModels, "snailmodelBlue", snailScale, snailPosition, false);
+        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
+        this.loadModel(this.snailModels, "snailmodelRed", snailScale, snailPosition, false);
 
-        // load different snail-models
-        this.loadSnail(new this.snail("snailmodelRed"));
-        this.loadSnail(new this.snail("snailmodelBlue"));
-        this.loadSnail(new this.snail("snailmodelGreen"));
-        this.loadSnail(new this.snail("snailmodelYellow"));
+        this.loadModel(this.sceneModels, "flag", { x: 0.1, y: 0.1, z: 0.1 }, { x: 5, y: 0, z: -20 }, true);
     }
 
     _createClass(Models, {
-        snail: {
-            value: function snail(filename) {
-                this.pathObj = "models/" + filename + ".obj";
-                this.pathMtl = "models/" + filename + ".mtl";
-                this.position = { x: 0, y: 0, z: 0 };
-            }
-        },
-        loadSnail: {
-            value: function loadSnail(snail) {
-                var newModel,
-                    trackAmount = 4;
-                // calculate single track-width
-                var floor_width = 10;
-                var trackWidth = floor_width / trackAmount;
-                // count up modelsToLoad
-                this.modelsToLoad++;
-                var loader = new THREE.OBJMTLLoader();
-                var _this = this;
-
-                loader.addEventListener("load", function (event) {
-                    newModel = event.content;
-                    newModel.traverse(function (child) {
-                        if (child instanceof THREE.Mesh) {
-                            child.castShadow = true;
-                        }
-                    });
-                    newModel.updateMatrix();
-                    newModel.castShadow = true;
-                    _this.snailModels.push(newModel); // push to snailModels array
-                    _this.loadComplete(); // call on model loaded, userfeedback
-                }, false);
-                loader.load(snail.pathObj, snail.pathMtl);
-            }
-        },
         setPlayerSnails: {
             value: function setPlayerSnails(playerCount) {
                 for (var i = 0; i < playerCount; i++) {
@@ -756,35 +723,31 @@ var Models = exports.Models = (function () {
                 this.scene.add(newModel);
             }
         },
-        loadFlag: {
-            value: function loadFlag() {
-                var newModel,
-                    trackAmount = 4;
-                // calculate single track-width
-                var floor_width = 10;
-                var trackWidth = floor_width / trackAmount;
-                // count up modelsToLoad
+        loadModel: {
+            value: function loadModel(modelArray, modelName, scale, position, pushToScene) {
+                var newModel;
                 this.modelsToLoad++;
-                var finPosZ = 23;
-
                 var _this = this;
 
                 var loader = new THREE.OBJMTLLoader();
                 loader.addEventListener("load", function (event) {
                     newModel = event.content;
+
                     newModel.traverse(function (child) {
                         if (child instanceof THREE.Mesh) {
                             child.castShadow = true;
                         }
                     });
+
                     newModel.updateMatrix();
-                    newModel.scale.set(0.1, 0.1, 0.1);
-                    newModel.position.x = trackWidth * trackAmount / 2;
-                    newModel.position.z = -finPosZ;
-                    _this.scene.add(newModel);
+                    newModel.scale.set(scale.x, scale.y, scale.z);
+                    newModel.position.set(position.x, position.y, position.z);
+
+                    modelArray.push(newModel);
+                    if (pushToScene) _this.scene.add(newModel);
                     _this.loadComplete();
                 }, false);
-                loader.load("models/flag.obj", "models/flag.mtl");
+                loader.load("models/" + modelName + ".obj", "models/" + modelName + ".mtl");
             }
         },
         loadComplete: {
