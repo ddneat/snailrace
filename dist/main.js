@@ -10,66 +10,19 @@ var playerSnails = { snails: [] };
 
 // global variables
 var camera = new THREE.PerspectiveCamera(45, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 100000),
-    cameraFinish,
     playerCount = 2;
-var controls,
-    devCam = false;
+var controls;
 
-var view = null;
-var render = function render() {
-	//free cam
-	if (devCam) {
-		controls.update();
-	}
-
-	if (game.isGameOver) {
-		game.animateParticleSystem();
-		//viewports
-		for (var k = 0; k < views.length; ++k) {
-
-			view = views[k];
-			camera = view.camera;
-			view.updateCamera(camera, game.scene);
-
-			var left = Math.floor(SCREEN_WIDTH * view.left);
-			var bottom = Math.floor(SCREEN_HEIGHT * view.bottom);
-			var width = Math.floor(SCREEN_WIDTH * view.width);
-			var height = Math.floor(SCREEN_HEIGHT * view.height);
-			renderer.setViewport(left, bottom, width, height);
-			renderer.setScissor(left, bottom, width, height);
-			renderer.enableScissorTest(true);
-
-			camera.aspect = width / height;
-			camera.updateProjectionMatrix();
-
-			renderer.render(game.scene, camera);
-		}
-	}
-
-	// render scene
-	if (!game.isGameOver) renderer.render(game.scene, camera);
-	// render-loop
-	animationFrameID = requestAnimationFrame(function () {
-		render();
-	});
-};
-
-var game = new Game({ camera: camera, render: render, playerSnails: playerSnails, playerCount: playerCount });
+var game = new Game({ camera: camera, playerSnails: playerSnails, playerCount: playerCount });
 
 $(game).on("game_over", function () {
 	removeControls();
 });
 
-// main only
-var renderer;
-var views;
-
-var animationFrameID = null;
-
 window.onload = function () {
-	if (animationFrameID) {
-		cancelAnimationFrame(animationFrameID);
-	}
+	//if(animationFrameID){
+	//	cancelAnimationFrame(animationFrameID);
+	//}
 	parseLocalStorageData();
 	showSettings();
 	init();
@@ -112,14 +65,8 @@ function showSettings() {
 			setPlayerCount(--playerCount);
 		}
 	});
+}
 
-	document.getElementById("changecamera").addEventListener("click", changeCamera, false);
-}
-//change camera
-function changeCamera() {
-	devCam = !devCam;
-	document.getElementById("changecamera").innerHTML = "devCam: " + devCam;
-}
 //initialize scene
 function init() {
 	// check if WebGl-rendering is supported, otherwise print message
@@ -128,23 +75,11 @@ function init() {
 		Detector.addGetWebGLMessage();
 	}
 
-	// define renderer
-	renderer = new THREE.WebGLRenderer({ antialias: true, clearColor: 12708324, clearAlpha: 1 });
-
-	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-	renderer.sortElements = false;
-
-	// shadow settings
-	renderer.shadowMapEnabled = true;
-	renderer.shadowMapSoft = true;
-	renderer.shadowMapType = THREE.PCFSoftShadowMap;
-	renderer.physicallyBasedShading = true;
-
 	// set render target
 	var container = document.createElement("div");
 	document.body.appendChild(container);
 	container.id = "viewport";
-	container.appendChild(renderer.domElement);
+	container.appendChild(game.renderer.domElement);
 
 	// create scene object, add fog to scene
 	game.scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
@@ -155,43 +90,6 @@ function init() {
 	camera.lookAt(new THREE.Vector3(0, 0, 0)); // scene point camera is looking at
 	game.scene.add(camera); // add camera to scene
 	//camera for finish screen
-	cameraFinish = new THREE.PerspectiveCamera(45, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 100000);
-	cameraFinish.position.set(10, 10, 10); // set position of the camera
-	cameraFinish.lastPosition = new THREE.Vector3(10, 10, 10);
-	cameraFinish.lookAt(new THREE.Vector3(0, 0, 0)); // scene point camera is looking at
-	game.scene.add(cameraFinish); // add camera to scene
-
-	//views for different viewports at finish
-	views = [{
-		left: 0,
-		bottom: 0,
-		width: 1,
-		height: 1,
-		eye: [10, 10, 10], //x,y,z position of camera
-		up: [0, 1, 0], //up vector
-		updateCamera: function updateCamera(camera) {
-			camera.position = camera.lastPosition;
-			camera.lookAt(camera.target);
-		}
-	}, {
-		left: 0,
-		bottom: 0.6,
-		width: 0.4,
-		height: 0.4,
-		eye: [0, 10, 0],
-		up: [0, 0, 1],
-		updateCamera: function updateCamera(camera) {
-			// camera.position.set(0,4, playerSnails[winner].position.z-10);
-
-			camera.position.x = camera.position.x * Math.cos(0.1) + Math.sin(0.1);
-			camera.position.z = camera.position.z * Math.cos(0.1) - Math.sin(0.1);
-
-			camera.lookAt(playerSnails.snails[game.winner].position);
-		}
-	}];
-
-	views[0].camera = camera;
-	views[1].camera = cameraFinish;
 
 	// point light, THREE.PointLight(color, density)
 	var PointLight = new THREE.PointLight(16777215, 0.2);
@@ -214,7 +112,7 @@ function init() {
 	game.scene.add(directionalLight); // add light to scene
 
 	// dev-cam, free-cam
-	controls = new THREE.TrackballControls(camera, renderer.domElement);
+	controls = new THREE.TrackballControls(camera, game.renderer.domElement);
 
 	//game parameters
 	var FC,
@@ -227,7 +125,7 @@ function init() {
 	FC = new FloorController(game, floor_width, floor_height, finPosZ, game.scene);
 
 	// handling window-resize, 100% height and 100% width
-	THREEx.WindowResize(renderer, camera);
+	THREEx.WindowResize(game.renderer, camera);
 }
 
 var removeControls = function removeControls() {
@@ -259,14 +157,72 @@ var Game = exports.Game = (function () {
         this.particles = [];
         this.scene = new THREE.Scene();
         this.camera = options.camera;
-        this.render = options.render;
         this.startTime;
+        this.animationFrameID;
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, clearColor: 12708324, clearAlpha: 1 });
         this.winner = 0;
         this.playerCount = options.playerCount;
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
+
+        this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
+
+        var _this = this;
+        this.views = [{
+            left: 0,
+            bottom: 0,
+            width: 1,
+            height: 1,
+            eye: [10, 10, 10], //x,y,z position of camera
+            up: [0, 1, 0], //up vector
+            updateCamera: function updateCamera(camera) {
+                camera.position = camera.lastPosition;
+                camera.lookAt(camera.target);
+            }
+        }, {
+            left: 0,
+            bottom: 0.6,
+            width: 0.4,
+            height: 0.4,
+            eye: [0, 10, 0],
+            up: [0, 0, 1],
+            updateCamera: function updateCamera(camera) {
+                // camera.position.set(0,4, playerSnails[winner].position.z-10);
+
+                camera.position.x = camera.position.x * Math.cos(0.1) + Math.sin(0.1);
+                camera.position.z = camera.position.z * Math.cos(0.1) - Math.sin(0.1);
+
+                camera.lookAt(_this.playerSnails.snails[_this.winner].position);
+            }
+        }];
+
+        this.init();
     }
 
     _createClass(Game, {
+        init: {
+            value: function init() {
+
+                // define renderer
+
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.sortElements = false;
+
+                // shadow settings
+                this.renderer.shadowMapEnabled = true;
+                this.renderer.shadowMapSoft = true;
+                this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+                this.renderer.physicallyBasedShading = true;
+
+                this.cameraFinish.position.set(10, 10, 10); // set position of the camera
+                this.cameraFinish.lastPosition = new THREE.Vector3(10, 10, 10);
+                this.cameraFinish.lookAt(new THREE.Vector3(0, 0, 0)); // scene point camera is looking at
+
+                this.scene.add(this.cameraFinish);
+
+                this.views[0].camera = this.camera;
+                this.views[1].camera = this.cameraFinish;
+            }
+        },
         getEndTime: {
             value: function getEndTime() {
                 var endTime = (new Date().getTime() - this.startTime) / 1000; //highscore-time
@@ -558,6 +514,41 @@ var Game = exports.Game = (function () {
                 this.winner = winID;
                 this.setGameOverScreen(winID);
                 $(this).trigger("game_over");
+            }
+        },
+        render: {
+            value: function render() {
+
+                if (this.isGameOver) {
+                    this.animateParticleSystem();
+                    //viewports
+                    for (var k = 0; k < this.views.length; ++k) {
+
+                        this.camera = this.views[k].camera;
+                        this.views[k].updateCamera(this.camera, this.scene);
+
+                        var left = Math.floor(window.innerWidth * this.views[k].left);
+                        var bottom = Math.floor(window.innerHeight * this.views[k].bottom);
+                        var width = Math.floor(window.innerWidth * this.views[k].width);
+                        var height = Math.floor(window.innerHeight * this.views[k].height);
+                        this.renderer.setViewport(left, bottom, width, height);
+                        this.renderer.setScissor(left, bottom, width, height);
+                        this.renderer.enableScissorTest(true);
+
+                        this.camera.aspect = width / height;
+                        this.camera.updateProjectionMatrix();
+
+                        this.renderer.render(this.scene, this.camera);
+                    }
+                }
+
+                // render scene
+                if (!this.isGameOver) this.renderer.render(this.scene, this.camera);
+                // render-loop
+                var _this = this;
+                this.animationFrameID = requestAnimationFrame(function () {
+                    _this.render();
+                });
             }
         }
     });
