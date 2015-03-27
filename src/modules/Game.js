@@ -1,32 +1,34 @@
+import { PubSub } from './PubSub.js';
 import { Models } from './Models.js';
 import { Environment } from './Environment.js';
 
 export class Game {
 
-    constructor(options) {
+    constructor() {
+        this.pubsub = new PubSub();
 
         this.config = {
             floor_width: 10,
             floor_height: 30,
             snailSpeed: 0.9,
-            finPosZ: 23
+            finPosZ: 23,
+            playerCount: 2
         };
-
 
         this.isGameOver = false;
         this.playerSnails = {snails: []};
         this.particles = [];
         this.scene = new THREE.Scene();
-        this.camera = options.camera;
         this.startTime;
         this.animationFrameID;
         this.renderer = new THREE.WebGLRenderer( {antialias: true, clearColor: 0xc1e9e4, clearAlpha: 1 } );
         this.winner = 0;
-        this.playerCount = options.playerCount;
+        this.playerCount = this.config.playerCount;
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
 
         this.environment = new Environment(this, this.config.floor_width, this.config.floor_height, this.config.finPosZ);
 
+        this.camera = new THREE.PerspectiveCamera(45,  window.innerWidth / window.innerHeight, 0.1, 100000);
         this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100000);
 
         var _this = this;
@@ -89,6 +91,50 @@ export class Game {
         this.views[0].camera = this.camera;
         this.views[1].camera = this.cameraFinish;
 
+        // check if WebGl-rendering is supported, otherwise print message
+        if (!Detector.webgl){
+            alert("WebGL is not supported or enabled. Please use a modern Browser.");
+            Detector.addGetWebGLMessage();
+        }
+
+        // set render target
+        var container = document.createElement( 'div' );
+        document.body.appendChild( container );
+        container.id = 'viewport';
+        container.appendChild( this.renderer.domElement );
+
+        // create scene object, add fog to scene
+        this.scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
+
+        // camera viewport and configuration, PerspectiveCamera(angle, aspect, near, far)
+        this.camera.position.set(10, 10, 10); // set position of the camera
+        this.camera.lastPosition = new THREE.Vector3(10,10,10);
+        this.camera.lookAt(new THREE.Vector3(0,0,0)); // scene point camera is looking at
+        this.scene.add(this.camera); // add camera to scene
+        //camera for finish screen
+
+        // point light, THREE.PointLight(color, density)
+        var PointLight = new THREE.PointLight(0xffffff, 0.2);
+        PointLight.position.set(10,20,-40); // set position of light
+        this.scene.add(PointLight); // add light to scene
+
+        // directional light, THREE.DirectionalLight(color, density)
+        var directionalLight  = new THREE.DirectionalLight(0xffffff, 1.0);
+        directionalLight.position.set(10,20,10); // set position
+        // shadow settings
+        directionalLight.shadowDarkness = 0.7;
+        directionalLight.shadowCameraRight = 30;
+        directionalLight.shadowCameraLeft = -30;
+        directionalLight.shadowCameraTop = 30;
+        directionalLight.shadowCameraBottom = -30;
+        directionalLight.shadowCameraNear = 1;
+        directionalLight.shadowCameraFar = 60;
+        // enable light is casting shadow
+        directionalLight.castShadow = true;
+        this.scene.add(directionalLight); // add light to scene
+
+        // handling window-resize, 100% height and 100% width
+        THREEx.WindowResize(this.renderer, this.camera);
     }
 
     getEndTime() {
@@ -303,45 +349,12 @@ export class Game {
         this.render(); // start renderer
     }
 
-    //writes highscore to local storage
-    submitScore(){
-        var name = $('#playerName').val();
-        var highscoreEntry = {name: name, time: endtime};
-        if(localStorage['highscore'] !== undefined){
-            var oldStorage = localStorage['highscore'];
-            var length = oldStorage.length;
-            var substring = oldStorage.substring(1, length-1);
-            oldStorage = "["+substring+","+JSON.stringify(highscoreEntry)+"]";
-            localStorage['highscore'] = oldStorage;
-        }else{
-            localStorage['highscore'] = "["+JSON.stringify(highscoreEntry)+"]";
-        }
 
-        $('#gameOverInput').hide();
 
-        $('#lobbyContainer').show("slide", {direction:"up", easing: 'easeInCubic'}, 1000 );
-        window.location.reload();
-    }
-
-    gameOverScreen(endtime){
-        var _this = this;
-        $('#gameOverInput').show(1200);
-        $('#playerName').focus(1200);
-        $('#timeElapsed').html(endtime+" Sek.");
-        $('#highscoreBtn').click(_this.submitScore);
-        $('#playerName').keypress(function(e){
-            if(e.keyCode == 13){
-                _this.submitScore();
-            }
-        });
-
-    }
-
-    setGameOverScreen(winID) {
-        this.gameOverScreen(this.getEndTime());
-        this.renderChampionText(winID);
+    setGameOverScreen() {
+        this.renderChampionText(this.winner);
         // add ParticleSystem to scene
-        this.addParticleSystem(winID);
+        this.addParticleSystem(this.winner);
 
         //TODO: uncomment after moving camera
         //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
@@ -357,10 +370,9 @@ export class Game {
 
     setGameOver(winID){
         this.isGameOver = true;
-
         this.winner = winID;
-        this.setGameOverScreen(winID);
-        this.removeControls();
+
+        this.pubsub.publish('game:over', { endTime: this.getEndTime() });
     }
 
     render(){
@@ -386,8 +398,6 @@ export class Game {
 
                 this.renderer.render(this.scene, this.camera);
             }
-
-
         }
 
         // render scene
