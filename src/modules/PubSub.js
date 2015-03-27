@@ -13,23 +13,23 @@
  */
 export class PubSub {
     /**
-     *  constructor
-     *  e.g.: new PubSub()
+     * constructor
+     * e.g.: new PubSub()
      *
-     *  @class PubSub
+     * @class PubSub
      */
     constructor() {
         this.cache = {};
     }
     /**
-     *  PubSub.publish
-     *  e.g.: PubSub.publish("/Article/added", [article], this);
+     * PubSub.publish
+     * e.g.: PubSub.publish("/Article/added", [article], this);
      *
-     *  @class PubSub
-     *  @method publish
-     *  @param topic {String}
-     *  @param args	{Object} Optional
-     *  @param scope {Object} Optional
+     * @class PubSub
+     * @method publish
+     * @param topic {String}
+     * @param args	{Object} Optional
+     * @param scope {Object} Optional
      */
     publish (topic, args, scope) {
         if (this.cache[topic]) {
@@ -42,14 +42,14 @@ export class PubSub {
         }
     }
     /**
-     *  Events.subscribe
-     *  e.g.: Events.subscribe("/Article/added", Articles.validate)
+     * Events.subscribe
+     * e.g.: Events.subscribe("/Article/added", Articles.validate)
      *
-     *  @class PubSub
-     *  @method subscribe
-     *  @param topic {String}
-     *  @param callback {Function}
-     *  @return Event handler {Array}
+     * @class PubSub
+     * @method subscribe
+     * @param topic {String}
+     * @param callback {Function}
+     * @return Event handler {Array}
      */
      subscribe (topic, callback) {
         if (!this.cache[topic]) {
@@ -59,15 +59,15 @@ export class PubSub {
         return [topic, callback];
     }
     /**
-     *  Events.unsubscribe
-     *  e.g.: var handle = Events.subscribe("/Article/added", Articles.validate);
+     * Events.unsubscribe
+     * e.g.: var handle = Events.subscribe("/Article/added", Articles.validate);
      *      Events.unsubscribe(handle);
      *
-     *  @class PubSub
-     *  @method unsubscribe
-     *  @param handle {Array}
-     *  @param completly {Boolean}
-     *  @return {type description }
+     * @class PubSub
+     * @method unsubscribe
+     * @param handle {Array}
+     * @param completly {Boolean}
+     * @return {type description }
      */
     unsubscribe (handle, completly) {
         var t = handle[0],
