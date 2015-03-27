@@ -1,6 +1,6 @@
 import { PubSub } from './PubSub.js';
-import { Models } from './Models.js';
-import { Environment } from './Environment.js';
+import { Models } from './3d/Models.js';
+import { Environment } from './3d/Environment.js';
 
 export class Game {
 

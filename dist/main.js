@@ -60,7 +60,7 @@ startBtn.addEventListener("click", function () {
     game.startGame();
 }, false);
 
-},{"./modules/Game.js":4,"./modules/Highscore.js":5}],2:[function(require,module,exports){
+},{"./modules/Game.js":5,"./modules/Highscore.js":6}],2:[function(require,module,exports){
 "use strict";
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
@@ -191,11 +191,104 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var Models = exports.Models = (function () {
+    function Models(options) {
+        _classCallCheck(this, Models);
+
+        this.modelsToLoad = 0;
+        this.snailModels = [];
+        this.playerSnails = options.playerSnails;
+        this.sceneModels = [];
+        this.scene = options.scene;
+
+        var snailScale = { x: 1, y: 1, z: 1 };
+        var snailPosition = { x: 1, y: 0, z: 1 };
+        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
+        this.loadModel(this.snailModels, "snailmodelBlue", snailScale, snailPosition, false);
+        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
+        this.loadModel(this.snailModels, "snailmodelRed", snailScale, snailPosition, false);
+
+        this.loadModel(this.sceneModels, "flag", { x: 0.1, y: 0.1, z: 0.1 }, { x: 5, y: 0, z: -20 }, true);
+    }
+
+    _createClass(Models, {
+        setPlayerSnails: {
+            value: function setPlayerSnails(playerCount) {
+                for (var i = 0; i < playerCount; i++) {
+                    this.setSingleSnail(i);
+                }
+            }
+        },
+        setSingleSnail: {
+            value: function setSingleSnail(playerNumber) {
+                var floor_width = 10;
+                var trackWidth = floor_width / 4;
+                var newModel = this.snailModels[playerNumber].clone();
+                newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
+                this.playerSnails.snails.push(newModel);
+                this.playerSnails.snails[playerNumber].slimeCounter = 0;
+                this.scene.add(newModel);
+            }
+        },
+        loadModel: {
+            value: function loadModel(modelArray, modelName, scale, position, pushToScene) {
+                var newModel;
+                this.modelsToLoad++;
+                var _this = this;
+
+                var loader = new THREE.OBJMTLLoader();
+                loader.addEventListener("load", function (event) {
+                    newModel = event.content;
+
+                    newModel.traverse(function (child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.castShadow = true;
+                        }
+                    });
+
+                    newModel.updateMatrix();
+                    newModel.scale.set(scale.x, scale.y, scale.z);
+                    newModel.position.set(position.x, position.y, position.z);
+
+                    modelArray.push(newModel);
+                    if (pushToScene) _this.scene.add(newModel);
+                    _this.loadComplete();
+                }, false);
+                loader.load("models/" + modelName + ".obj", "models/" + modelName + ".mtl");
+            }
+        },
+        loadComplete: {
+            value: function loadComplete() {
+                this.modelsToLoad--;
+                if (this.modelsToLoad <= 0) {
+                    // game ready to start, remove loading bar
+                    document.getElementById("loadingBar").style.display = "none";
+                    // enable start game
+                    $("#startgame").removeAttr("disabled").removeClass("btn-disabled");
+                }
+            }
+        }
+    });
+
+    return Models;
+})();
+
+},{}],5:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var PubSub = require("./PubSub.js").PubSub;
 
-var Models = require("./Models.js").Models;
+var Models = require("./3d/Models.js").Models;
 
-var Environment = require("./Environment.js").Environment;
+var Environment = require("./3d/Environment.js").Environment;
 
 var Game = exports.Game = (function () {
     function Game() {
@@ -632,7 +725,7 @@ var Game = exports.Game = (function () {
     return Game;
 })();
 
-},{"./Environment.js":2,"./Models.js":6,"./PubSub.js":7}],5:[function(require,module,exports){
+},{"./3d/Environment.js":2,"./3d/Models.js":4,"./PubSub.js":7}],6:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -646,6 +739,15 @@ Object.defineProperty(exports, "__esModule", {
 var PubSub = require("./PubSub.js").PubSub;
 
 var Highscore = exports.Highscore = (function () {
+    /**
+     * constructor
+     * e.g.: new Highscore()
+     *
+     * Sets localStorage as default if no storage param is passed
+     *
+     * @param storage {Object} Optional
+     */
+
     function Highscore(storage) {
         _classCallCheck(this, Highscore);
 
@@ -657,6 +759,13 @@ var Highscore = exports.Highscore = (function () {
 
     _createClass(Highscore, {
         saveItem: {
+            /**
+             * Highscore.saveItem
+             *
+             * @param name {String}
+             * @param time {String}
+             */
+
             value: function saveItem(name, time) {
                 var data = JSON.parse(this.storage.getItem("highscore"));
                 data.push({ name: name, time: time });
@@ -666,6 +775,12 @@ var Highscore = exports.Highscore = (function () {
             }
         },
         getJSON: {
+            /**
+             * Highscore.getJSON
+             *
+             * @return {Array}
+             */
+
             value: function getJSON() {
                 var storageContent = JSON.parse(this.storage.getItem("highscore"));
                 if (!storageContent.length) {
@@ -676,6 +791,14 @@ var Highscore = exports.Highscore = (function () {
             }
         },
         getHTML: {
+            /**
+             * Highscore.getHTML
+             *
+             * Returns an empty string as default
+             *
+             * @return {String}
+             */
+
             value: function getHTML() {
                 var storageContent = this.getJSON();
                 var result = "";
@@ -693,100 +816,7 @@ var Highscore = exports.Highscore = (function () {
     return Highscore;
 })();
 
-},{"./PubSub.js":7}],6:[function(require,module,exports){
-"use strict";
-
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var Models = exports.Models = (function () {
-    function Models(options) {
-        _classCallCheck(this, Models);
-
-        this.modelsToLoad = 0;
-        this.snailModels = [];
-        this.playerSnails = options.playerSnails;
-        this.sceneModels = [];
-        this.scene = options.scene;
-
-        var snailScale = { x: 1, y: 1, z: 1 };
-        var snailPosition = { x: 1, y: 0, z: 1 };
-        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, "snailmodelBlue", snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, "snailmodelRed", snailScale, snailPosition, false);
-
-        this.loadModel(this.sceneModels, "flag", { x: 0.1, y: 0.1, z: 0.1 }, { x: 5, y: 0, z: -20 }, true);
-    }
-
-    _createClass(Models, {
-        setPlayerSnails: {
-            value: function setPlayerSnails(playerCount) {
-                for (var i = 0; i < playerCount; i++) {
-                    this.setSingleSnail(i);
-                }
-            }
-        },
-        setSingleSnail: {
-            value: function setSingleSnail(playerNumber) {
-                var floor_width = 10;
-                var trackWidth = floor_width / 4;
-                var newModel = this.snailModels[playerNumber].clone();
-                newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
-                this.playerSnails.snails.push(newModel);
-                this.playerSnails.snails[playerNumber].slimeCounter = 0;
-                this.scene.add(newModel);
-            }
-        },
-        loadModel: {
-            value: function loadModel(modelArray, modelName, scale, position, pushToScene) {
-                var newModel;
-                this.modelsToLoad++;
-                var _this = this;
-
-                var loader = new THREE.OBJMTLLoader();
-                loader.addEventListener("load", function (event) {
-                    newModel = event.content;
-
-                    newModel.traverse(function (child) {
-                        if (child instanceof THREE.Mesh) {
-                            child.castShadow = true;
-                        }
-                    });
-
-                    newModel.updateMatrix();
-                    newModel.scale.set(scale.x, scale.y, scale.z);
-                    newModel.position.set(position.x, position.y, position.z);
-
-                    modelArray.push(newModel);
-                    if (pushToScene) _this.scene.add(newModel);
-                    _this.loadComplete();
-                }, false);
-                loader.load("models/" + modelName + ".obj", "models/" + modelName + ".mtl");
-            }
-        },
-        loadComplete: {
-            value: function loadComplete() {
-                this.modelsToLoad--;
-                if (this.modelsToLoad <= 0) {
-                    // game ready to start, remove loading bar
-                    document.getElementById("loadingBar").style.display = "none";
-                    // enable start game
-                    $("#startgame").removeAttr("disabled").removeClass("btn-disabled");
-                }
-            }
-        }
-    });
-
-    return Models;
-})();
-
-},{}],7:[function(require,module,exports){
+},{"./PubSub.js":7}],7:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -812,10 +842,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var PubSub = exports.PubSub = (function () {
     /**
-     *  constructor
-     *  e.g.: new PubSub()
+     * constructor
+     * e.g.: new PubSub()
      *
-     *  @class PubSub
+     * @class PubSub
      */
 
     function PubSub() {
@@ -827,14 +857,14 @@ var PubSub = exports.PubSub = (function () {
     _createClass(PubSub, {
         publish: {
             /**
-             *  PubSub.publish
-             *  e.g.: PubSub.publish("/Article/added", [article], this);
+             * PubSub.publish
+             * e.g.: PubSub.publish("/Article/added", [article], this);
              *
-             *  @class PubSub
-             *  @method publish
-             *  @param topic {String}
-             *  @param args	{Object} Optional
-             *  @param scope {Object} Optional
+             * @class PubSub
+             * @method publish
+             * @param topic {String}
+             * @param args	{Object} Optional
+             * @param scope {Object} Optional
              */
 
             value: function publish(topic, args, scope) {
@@ -850,14 +880,14 @@ var PubSub = exports.PubSub = (function () {
         },
         subscribe: {
             /**
-             *  Events.subscribe
-             *  e.g.: Events.subscribe("/Article/added", Articles.validate)
+             * Events.subscribe
+             * e.g.: Events.subscribe("/Article/added", Articles.validate)
              *
-             *  @class PubSub
-             *  @method subscribe
-             *  @param topic {String}
-             *  @param callback {Function}
-             *  @return Event handler {Array}
+             * @class PubSub
+             * @method subscribe
+             * @param topic {String}
+             * @param callback {Function}
+             * @return Event handler {Array}
              */
 
             value: function subscribe(topic, callback) {
@@ -870,15 +900,15 @@ var PubSub = exports.PubSub = (function () {
         },
         unsubscribe: {
             /**
-             *  Events.unsubscribe
-             *  e.g.: var handle = Events.subscribe("/Article/added", Articles.validate);
+             * Events.unsubscribe
+             * e.g.: var handle = Events.subscribe("/Article/added", Articles.validate);
              *      Events.unsubscribe(handle);
              *
-             *  @class PubSub
-             *  @method unsubscribe
-             *  @param handle {Array}
-             *  @param completly {Boolean}
-             *  @return {type description }
+             * @class PubSub
+             * @method unsubscribe
+             * @param handle {Array}
+             * @param completly {Boolean}
+             * @return {type description }
              */
 
             value: function unsubscribe(handle, completly) {
