@@ -135,11 +135,17 @@ export class Renderer {
      * e.g.: Renderer.render();
      */
     render() {
-        if(this.isGameOver){
-            this.confetti.animate();
+        if(this.game.isGameOver){
+            this.game.confetti.animate();
+
+            //TODO: refactor winnerSnail
+            //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
+
+            this.webglRenderer.render(this.scene, this.camera);
+
 
             //viewports
-            for ( var k = 0; k < this.views.length; ++k ) {
+/*            for ( var k = 0; k < this.views.length; ++k ) {
 
                 this.camera = this.views[k].camera;
                 this.views[k].updateCamera( this.camera, this.scene);
@@ -156,7 +162,7 @@ export class Renderer {
                 this.camera.updateProjectionMatrix();
 
                 this.webglRenderer.render(this.scene, this.camera);
-            }
+            }*/
         }
 
         if(!this.game.isGameOver) {

@@ -33,7 +33,7 @@ export class Game {
     }
 
     getEndTime() {
-        var endTime = (new Date().getTime() - this.startTime) / 1000;//highscore-time
+        var endTime = (new Date().getTime() - this.startTime) / 1000;
         endTime.toFixed(3);
         return endTime;
     }
@@ -110,21 +110,20 @@ export class Game {
     startGame(gameOverCallback){
         this.models.setPlayerSnails(this.playerCount);
         this.renderer.render();
+        this.startTime = new Date().getTime();
 
         this.gameOverCallback = gameOverCallback;
     }
 
     setGameOver(winID){
         this.isGameOver = true;
-        this.winnerTrack = winID;
+        this.winnerTrack = winID + 1;
 
-        this.environment.addWinnerCaption(1);
-        this.confetti = new Confetti(this.scene, this.config, 1);
-
-        //TODO: uncomment after moving camera
-        //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
+        this.environment.addWinnerCaption(this.winnerTrack);
+        this.confetti = new Confetti(this.scene, this.config, this.winnerTrack);
 
         this.endTime = this.getEndTime();
-        this.gameOverCallback();
+        console.log(this.endTime);
+        this.gameOverCallback(this.endTime);
     }
 }

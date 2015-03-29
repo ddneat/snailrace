@@ -123,13 +123,13 @@ var Snailrace = (function () {
                 $("#gameOverInput").show(1200);
                 $("#timeElapsed").html(this.game.endTime + " Sek.");
 
-                $("#highscoreBtn").click(function () {
+                $("#highscoreBtn").click((function () {
                     this.saveHighscore();
-                }).bind(this);
+                }).bind(this));
 
-                $("#playerName").focus(1200).keypress(function (e) {
+                $("#playerName").focus(1200).keypress((function (e) {
                     if (e.keyCode == 13) this.saveHighscore();
-                }).bind(this);
+                }).bind(this));
 
                 this.removeControls();
             }
@@ -807,28 +807,33 @@ var Renderer = exports.Renderer = (function () {
              */
 
             value: function render() {
-                if (this.isGameOver) {
-                    this.confetti.animate();
+                if (this.game.isGameOver) {
+                    this.game.confetti.animate();
+
+                    //TODO: refactor winnerSnail
+                    //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
+
+                    this.webglRenderer.render(this.scene, this.camera);
 
                     //viewports
-                    for (var k = 0; k < this.views.length; ++k) {
-
-                        this.camera = this.views[k].camera;
-                        this.views[k].updateCamera(this.camera, this.scene);
-
-                        var left = Math.floor(window.innerWidth * this.views[k].left);
-                        var bottom = Math.floor(window.innerHeight * this.views[k].bottom);
-                        var width = Math.floor(window.innerWidth * this.views[k].width);
-                        var height = Math.floor(window.innerHeight * this.views[k].height);
-                        this.webglRenderer.setViewport(left, bottom, width, height);
-                        this.webglRenderer.setScissor(left, bottom, width, height);
-                        this.webglRenderer.enableScissorTest(true);
-
-                        this.camera.aspect = width / height;
-                        this.camera.updateProjectionMatrix();
-
-                        this.webglRenderer.render(this.scene, this.camera);
-                    }
+                    /*            for ( var k = 0; k < this.views.length; ++k ) {
+                    
+                                    this.camera = this.views[k].camera;
+                                    this.views[k].updateCamera( this.camera, this.scene);
+                    
+                                    var left   = Math.floor( window.innerWidth  * this.views[k].left );
+                                    var bottom = Math.floor( window.innerHeight * this.views[k].bottom );
+                                    var width  = Math.floor( window.innerWidth  * this.views[k].width );
+                                    var height = Math.floor( window.innerHeight * this.views[k].height );
+                                    this.webglRenderer.setViewport( left, bottom, width, height );
+                                    this.webglRenderer.setScissor( left, bottom, width, height );
+                                    this.webglRenderer.enableScissorTest ( true );
+                    
+                                    this.camera.aspect = width / height;
+                                    this.camera.updateProjectionMatrix();
+                    
+                                    this.webglRenderer.render(this.scene, this.camera);
+                                }*/
                 }
 
                 if (!this.game.isGameOver) {
@@ -899,7 +904,7 @@ var Game = exports.Game = (function () {
     _createClass(Game, {
         getEndTime: {
             value: function getEndTime() {
-                var endTime = (new Date().getTime() - this.startTime) / 1000; //highscore-time
+                var endTime = (new Date().getTime() - this.startTime) / 1000;
                 endTime.toFixed(3);
                 return endTime;
             }
@@ -985,6 +990,7 @@ var Game = exports.Game = (function () {
             value: function startGame(gameOverCallback) {
                 this.models.setPlayerSnails(this.playerCount);
                 this.renderer.render();
+                this.startTime = new Date().getTime();
 
                 this.gameOverCallback = gameOverCallback;
             }
@@ -992,16 +998,14 @@ var Game = exports.Game = (function () {
         setGameOver: {
             value: function setGameOver(winID) {
                 this.isGameOver = true;
-                this.winnerTrack = winID;
+                this.winnerTrack = winID + 1;
 
-                this.environment.addWinnerCaption(1);
-                this.confetti = new Confetti(this.scene, this.config, 1);
-
-                //TODO: uncomment after moving camera
-                //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
+                this.environment.addWinnerCaption(this.winnerTrack);
+                this.confetti = new Confetti(this.scene, this.config, this.winnerTrack);
 
                 this.endTime = this.getEndTime();
-                this.gameOverCallback();
+                console.log(this.endTime);
+                this.gameOverCallback(this.endTime);
             }
         }
     });

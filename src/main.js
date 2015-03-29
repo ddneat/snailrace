@@ -86,13 +86,13 @@ class Snailrace {
         $('#gameOverInput').show(1200);
         $('#timeElapsed').html( this.game.endTime + " Sek.");
 
-        $('#highscoreBtn').click(function(){
+        $('#highscoreBtn').click((function(){
             this.saveHighscore();
-        }).bind(this);
+        }).bind(this));
 
-        $('#playerName').focus(1200).keypress(function(e){
+        $('#playerName').focus(1200).keypress((function(e){
             if(e.keyCode == 13) this.saveHighscore();
-        }).bind(this);
+        }).bind(this));
 
         this.removeControls();
     }
