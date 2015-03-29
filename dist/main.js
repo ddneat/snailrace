@@ -10,6 +10,11 @@ var Highscore = require("./modules/Highscore.js").Highscore;
 var Game = require("./modules/Game.js").Game;
 
 var Snailrace = (function () {
+    /**
+     * constructor
+     * e.g.: new Snailrace()
+     */
+
     function Snailrace() {
         _classCallCheck(this, Snailrace);
 
@@ -25,6 +30,11 @@ var Snailrace = (function () {
 
     _createClass(Snailrace, {
         addStartButton: {
+            /**
+             * Snailrace.addStartButton
+             * e.g.: Snailrace.addStartButton();
+             */
+
             value: function addStartButton() {
                 document.getElementById("startgame").addEventListener("click", (function () {
                     $("#lobbyContainer").hide("slide", { direction: "up", easing: "easeInCubic" }, 1000);
@@ -33,11 +43,21 @@ var Snailrace = (function () {
             }
         },
         loadHighscore: {
+            /**
+             * Snailrace.loadHighscore
+             * e.g.: Snailrace.loadHighscore();
+             */
+
             value: function loadHighscore() {
                 $("#high").append(this.highscore.getHTML());
             }
         },
         addConfigOptions: {
+            /**
+             * Snailrace.addConfigOptions
+             * e.g.: Snailrace.addConfigOptions();
+             */
+
             value: function addConfigOptions() {
                 $("#playerAdd").click(function () {
                     playerCount < 4 && $("#playerCount").html(++this.playerCount);
@@ -49,6 +69,11 @@ var Snailrace = (function () {
             }
         },
         gameOverCallback: {
+            /**
+             * Snailrace.gameOverCallback
+             * e.g.: Snailrace.gameOverCallback();
+             */
+
             value: function gameOverCallback() {
                 $("#gameOverInput").show(1200);
                 $("#timeElapsed").html(data.endTime + " Sek.");
@@ -70,6 +95,11 @@ var Snailrace = (function () {
             }
         },
         highscoreSavedCallback: {
+            /**
+             * Snailrace.highscoreSavedCallback
+             * e.g.: Snailrace.highscoreSavedCallback();
+             */
+
             value: function highscoreSavedCallback() {
                 window.location.reload();
             }
@@ -788,8 +818,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var PubSub = require("./PubSub.js").PubSub;
-
 var Models = require("./3d/Models.js").Models;
 
 var Environment = require("./3d/Environment.js").Environment;
@@ -804,7 +832,6 @@ var Game = exports.Game = (function () {
     function Game() {
         _classCallCheck(this, Game);
 
-        this.pubsub = new PubSub();
         this.scene = new THREE.Scene();
         this.isGameOver = false;
         this.winnerTrack = 0;
@@ -972,7 +999,7 @@ var Game = exports.Game = (function () {
     return Game;
 })();
 
-},{"./3d/Confetti.js":2,"./3d/Counter.js":3,"./3d/Environment.js":4,"./3d/Models.js":5,"./3d/Renderer.js":6,"./PubSub.js":9}],8:[function(require,module,exports){
+},{"./3d/Confetti.js":2,"./3d/Counter.js":3,"./3d/Environment.js":4,"./3d/Models.js":5,"./3d/Renderer.js":6}],8:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -982,8 +1009,6 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var PubSub = require("./PubSub.js").PubSub;
 
 var Highscore = exports.Highscore = (function () {
     /**
@@ -997,8 +1022,6 @@ var Highscore = exports.Highscore = (function () {
 
     function Highscore(storage) {
         _classCallCheck(this, Highscore);
-
-        this.pubsub = new PubSub();
 
         this.storage = storage || localStorage;
         this.storage.getItem("highscore") === undefined && this.storage.setItem("highscore", "[]");
@@ -1061,122 +1084,6 @@ var Highscore = exports.Highscore = (function () {
     });
 
     return Highscore;
-})();
-
-},{"./PubSub.js":9}],9:[function(require,module,exports){
-"use strict";
-
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-/**
- *  Reusable ES6 Pub/Sub class.
- *
- *  Based on Luís Couto version
- *  https://github.com/phiggins42/bloody-jquery-plugins/blob/55e41df9bf08f42378bb08b93efcb28555b61aeb/pubsub.js
- *
- *  Luís Couto implemented a vanilla version of Peter Higgins' port from Dojo to jQuery
- *  https://github.com/phiggins42/bloody-jquery-plugins/blob/master/pubsub.js
- *
- *  Re-adapted using ECMAScript 6
- *
- *  @class PubSub
- */
-
-var PubSub = exports.PubSub = (function () {
-    /**
-     * constructor
-     * e.g.: new PubSub()
-     *
-     * @class PubSub
-     */
-
-    function PubSub() {
-        _classCallCheck(this, PubSub);
-
-        this.cache = {};
-    }
-
-    _createClass(PubSub, {
-        publish: {
-            /**
-             * PubSub.publish
-             * e.g.: PubSub.publish("/Article/added", [article], this);
-             *
-             * @class PubSub
-             * @method publish
-             * @param topic {String}
-             * @param args	{Object} Optional
-             * @param scope {Object} Optional
-             */
-
-            value: function publish(topic, args, scope) {
-                if (this.cache[topic]) {
-                    var thisTopic = this.cache[topic],
-                        i = thisTopic.length - 1;
-
-                    for (i; i >= 0; i -= 1) {
-                        thisTopic[i].apply(scope || this, [args] || []);
-                    }
-                }
-            }
-        },
-        subscribe: {
-            /**
-             * Events.subscribe
-             * e.g.: Events.subscribe("/Article/added", Articles.validate)
-             *
-             * @class PubSub
-             * @method subscribe
-             * @param topic {String}
-             * @param callback {Function}
-             * @return Event handler {Array}
-             */
-
-            value: function subscribe(topic, callback) {
-                if (!this.cache[topic]) {
-                    this.cache[topic] = [];
-                }
-                this.cache[topic].push(callback);
-                return [topic, callback];
-            }
-        },
-        unsubscribe: {
-            /**
-             * Events.unsubscribe
-             * e.g.: var handle = Events.subscribe("/Article/added", Articles.validate);
-             *      Events.unsubscribe(handle);
-             *
-             * @class PubSub
-             * @method unsubscribe
-             * @param handle {Array}
-             * @param completly {Boolean}
-             * @return {type description }
-             */
-
-            value: function unsubscribe(handle, completly) {
-                var t = handle[0],
-                    i = cache[t].length - 1;
-
-                if (this.cache[t]) {
-                    for (i; i >= 0; i -= 1) {
-                        if (this.cache[t][i] === handle[1]) {
-                            this.cache[t].splice(this.cache[t][i], 1);
-                            if (completly) {
-                                delete this.cache[t];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    return PubSub;
 })();
 
 },{}]},{},[1]);
