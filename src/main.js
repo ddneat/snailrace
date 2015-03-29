@@ -1,58 +1,62 @@
 import { Highscore } from './modules/Highscore.js';
 import { Game } from './modules/Game.js';
 
-var highscore = new Highscore();
-var game = new Game();
+class Snailrace {
+    constructor() {
+        this.playerCount = 2;
 
-$('#high').append(highscore.getHTML());
+        this.highscore = new Highscore();
+        this.game = new Game();
 
-game.pubsub.subscribe('game:over', function(data) {
-    console.log(data);
-    $('#gameOverInput').show(1200);
-    $('#timeElapsed').html(data.endTime+" Sek.");
+        this.addStartButton();
+        this.addConfigOptions();
+        this.loadHighscore();
+    }
 
-    var $playerNameInput = $('#playerName').focus(1200);
+    addStartButton() {
+        document.getElementById("startgame").addEventListener('click', (function() {
+            $('#lobbyContainer').hide("slide", {direction:"up", easing: 'easeInCubic'}, 1000);
+            this.game.startGame();
+        }).bind(this), false);
+    }
 
-    $('#highscoreBtn').click(function(){
-        highscore.saveItem($('#playerName').val(), data.endTime);
+    loadHighscore() {
+        $('#high').append(this.highscore.getHTML());
+    }
 
-    });
+    addConfigOptions() {
+        $("#playerAdd").click(function() {
+            playerCount < 4 && $("#playerCount").html(++this.playerCount);
+        });
 
-    $playerNameInput.keypress(function(e){
-        if(e.keyCode == 13){
-            highscore.saveItem($('#playerName').val(), data.endTime);
-        }
-    });
+        $("#playerRemove").click(function() {
+            playerCount > 4 && $("#playerCount").html(++this.playerCount);
+        });
+    }
 
-    game.setGameOverScreen();
-    game.removeControls();
-});
+    gameOverCallback() {
+        $('#gameOverInput').show(1200);
+        $('#timeElapsed').html(data.endTime+" Sek.");
 
-highscore.pubsub.subscribe('highscore:saved', function() {
-    window.location.reload();
-});
+        var $playerNameInput = $('#playerName').focus(1200);
 
-// set player count by value
-function setPlayerCount(amount){
-    $("#playerCount").html(amount);
+        $('#highscoreBtn').click(function(){
+            this.highscore.saveItem($('#playerName').val(), data.endTime);
+        }).bind(this);
+
+        $playerNameInput.keypress(function(e){
+            if(e.keyCode == 13){
+                this.highscore.saveItem($('#playerName').val(), data.endTime);
+            }
+        }).bind(this);
+
+        this.game.setGameOverScreen();
+        this.game.removeControls();
+    }
+
+    highscoreSavedCallback() {
+        window.location.reload();
+    }
 }
-//shows settings
-function showSettings(){
-    $("#playerAdd").click(function() {
-        if(playerCount < 4){
-            setPlayerCount(++playerCount);
-        }
-    });
-    $("#playerRemove").click(function() {
-        if(playerCount > 1){
-            setPlayerCount(--playerCount);
-        }
-    });
-}
 
-showSettings();
-
-var startBtn = document.getElementById("startgame");
-startBtn.addEventListener('click', function(){
-    game.startGame();
-}, false);
+new Snailrace();

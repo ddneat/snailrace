@@ -1,127 +1,87 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var Highscore = require("./modules/Highscore.js").Highscore;
 
 var Game = require("./modules/Game.js").Game;
 
-var highscore = new Highscore();
-var game = new Game();
+var Snailrace = (function () {
+    function Snailrace() {
+        _classCallCheck(this, Snailrace);
 
-$("#high").append(highscore.getHTML());
+        this.playerCount = 2;
 
-game.pubsub.subscribe("game:over", function (data) {
-    console.log(data);
-    $("#gameOverInput").show(1200);
-    $("#timeElapsed").html(data.endTime + " Sek.");
+        this.highscore = new Highscore();
+        this.game = new Game();
 
-    var $playerNameInput = $("#playerName").focus(1200);
-
-    $("#highscoreBtn").click(function () {
-        highscore.saveItem($("#playerName").val(), data.endTime);
-    });
-
-    $playerNameInput.keypress(function (e) {
-        if (e.keyCode == 13) {
-            highscore.saveItem($("#playerName").val(), data.endTime);
-        }
-    });
-
-    game.setGameOverScreen();
-    game.removeControls();
-});
-
-highscore.pubsub.subscribe("highscore:saved", function () {
-    window.location.reload();
-});
-
-// set player count by value
-function setPlayerCount(amount) {
-    $("#playerCount").html(amount);
-}
-//shows settings
-function showSettings() {
-    $("#playerAdd").click(function () {
-        if (playerCount < 4) {
-            setPlayerCount(++playerCount);
-        }
-    });
-    $("#playerRemove").click(function () {
-        if (playerCount > 1) {
-            setPlayerCount(--playerCount);
-        }
-    });
-}
-
-showSettings();
-
-var startBtn = document.getElementById("startgame");
-startBtn.addEventListener("click", function () {
-    game.startGame();
-}, false);
-
-},{"./modules/Game.js":5,"./modules/Highscore.js":6}],2:[function(require,module,exports){
-"use strict";
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var Floor = require("./Floor.js").Floor;
-
-var Environment = exports.Environment = function Environment(game, floor_width, floor_height, finPosZ) {
-    _classCallCheck(this, Environment);
-
-    // soil floor
-    var soilSize = { width: floor_height * 20, height: floor_height * 20 };
-    var soilPivotCenter = { x: 0, y: 0, z: 0 };
-    var soil = new Floor(game.scene, "gras.jpg", soilSize, soilPivotCenter, -0.01, 1, { x: soilSize.width / 5, y: soilSize.height / 5 });
-    soil.addPlaneToScene();
-
-    // track floor
-    var trackSize = { width: floor_width, height: floor_height };
-    var trackPivotCenter = { x: trackSize.width / 2, y: trackSize.height / 2 - 3, z: 0 };
-    var track = new Floor(game.scene, "floor_comic.jpg", trackSize, trackPivotCenter, 0, 1, { x: trackSize.width / 5, y: trackSize.height / 5 });
-    track.addPlaneToScene();
-
-    // add start and finish-lines
-    var opacity = 0.7,
-        linePivotCenter,
-        lineSize = { width: floor_width, height: 0.3 };
-    // start: front snale
-    linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 - 3, z: 0 };
-    var startCaptionFront = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
-    startCaptionFront.addPlaneToScene();
-    // start: behind snail
-    linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 + 1, z: 0 };
-    var startCaptionBehind = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
-    startCaptionBehind.addPlaneToScene();
-
-    // finish
-    linePivotCenter = { x: lineSize.width / 2, y: finPosZ, z: 0 };
-    var finishLine = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
-    finishLine.addPlaneToScene();
-
-    // line behind finisharea
-    var finishAreaDeepth = 4;
-    linePivotCenter = { x: lineSize.width / 2, y: finPosZ + finishAreaDeepth, z: 0 };
-    var finishLine = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
-    finishLine.addPlaneToScene();
-
-    var trackAmount = 4,
-        trackWidth = floor_width / trackAmount,
-        fontheight = 0.01,
-        fontsize = 1;
-
-    // create 1-4 start-caption
-    for (var i = 0; i < trackAmount; i++) {
-        game.createCaption(i + 1, fontheight, fontsize, { x: trackWidth * i + trackWidth / 2, y: 0, z: 1 }, { x: -Math.PI / 2, y: 0, z: 0 }, 16777215, 0.9, "trackCaption" + i, true, { receiveShadow: true, castShadow: false });
+        this.addStartButton();
+        this.addConfigOptions();
+        this.loadHighscore();
     }
-};
 
-},{"./Floor.js":3}],3:[function(require,module,exports){
+    _createClass(Snailrace, {
+        addStartButton: {
+            value: function addStartButton() {
+                document.getElementById("startgame").addEventListener("click", (function () {
+                    $("#lobbyContainer").hide("slide", { direction: "up", easing: "easeInCubic" }, 1000);
+                    this.game.startGame();
+                }).bind(this), false);
+            }
+        },
+        loadHighscore: {
+            value: function loadHighscore() {
+                $("#high").append(this.highscore.getHTML());
+            }
+        },
+        addConfigOptions: {
+            value: function addConfigOptions() {
+                $("#playerAdd").click(function () {
+                    playerCount < 4 && $("#playerCount").html(++this.playerCount);
+                });
+
+                $("#playerRemove").click(function () {
+                    playerCount > 4 && $("#playerCount").html(++this.playerCount);
+                });
+            }
+        },
+        gameOverCallback: {
+            value: function gameOverCallback() {
+                $("#gameOverInput").show(1200);
+                $("#timeElapsed").html(data.endTime + " Sek.");
+
+                var $playerNameInput = $("#playerName").focus(1200);
+
+                $("#highscoreBtn").click(function () {
+                    this.highscore.saveItem($("#playerName").val(), data.endTime);
+                }).bind(this);
+
+                $playerNameInput.keypress(function (e) {
+                    if (e.keyCode == 13) {
+                        this.highscore.saveItem($("#playerName").val(), data.endTime);
+                    }
+                }).bind(this);
+
+                this.game.setGameOverScreen();
+                this.game.removeControls();
+            }
+        },
+        highscoreSavedCallback: {
+            value: function highscoreSavedCallback() {
+                window.location.reload();
+            }
+        }
+    });
+
+    return Snailrace;
+})();
+
+new Snailrace();
+
+},{"./modules/Game.js":7,"./modules/Highscore.js":8}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -132,55 +92,380 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var Floor = exports.Floor = (function () {
-    function Floor(scene, textureName, size, posCenter, correctionY, opacity, repeatValue) {
-        _classCallCheck(this, Floor);
+var Confetti = exports.Confetti = (function () {
+    /**
+     * constructor
+     * e.g.: new Confetti()
+     *
+     * Winner Confetti Animation
+     *
+     * @param scene {Object}
+     * @param track {Number} 1-4
+     */
+
+    function Confetti(scene, config, track) {
+        _classCallCheck(this, Confetti);
 
         this.scene = scene;
-        this.textureName = textureName;
-        this.size = size;
-        this.posCenter = posCenter;
-        this.correctionY = correctionY;
-        this.opacity = opacity;
-        this.repeatValue = repeatValue;
+        this.config = config;
+        this.track = track;
+
+        this.particles = [];
+        this.init();
     }
 
-    _createClass(Floor, {
-        addPlaneToScene: {
-            value: function addPlaneToScene() {
+    _createClass(Confetti, {
+        init: {
+            /**
+             * Confetti.init
+             * e.g.: Confetti.init();
+             */
 
-                var newObjectGeometry = new THREE.PlaneGeometry(this.size.width, this.size.height, 0); //width, height, segments
-                var newObjectTexture, newObjectMaterial;
+            value: function init() {
+                var materials = [];
+                var positionX = this.config.trackWidth * (this.track - 1) + 1.3;
 
-                if (this.textureName != "") {
-                    // if texture is set
-                    newObjectTexture = THREE.ImageUtils.loadTexture("img/" + this.textureName);
-                    // set texture properties, repeat
-                    newObjectTexture.wrapS = newObjectTexture.wrapT = THREE.RepeatWrapping;
-                    newObjectTexture.repeat.set(this.repeatValue.x, this.repeatValue.y); //x-repeat, y-repeat
-                    newObjectMaterial = new THREE.MeshLambertMaterial({ map: newObjectTexture, transparent: true, opacity: this.opacity });
-                } else {
-                    newObjectMaterial = new THREE.MeshLambertMaterial({ color: "#fff", transparent: true, opacity: this.opacity });
+                for (var i = 0; i < 15; i++) {
+                    var geometry = new THREE.Geometry();
+
+                    for (var j = 0; j < 1200; j++) {
+                        var vertex = new THREE.Vector3();
+                        vertex.x = Math.random() * 2 - 1;
+                        vertex.y = Math.random() * 15 - 1;
+                        vertex.z = Math.random() * 30 - 1;
+                        vertex.velocity = new THREE.Vector3(0, -1, 0);
+                        geometry.vertices.push(vertex);
+                    }
+
+                    var color = "#000000".replace(/0/g, function () {
+                        return (~ ~(Math.random() * 16)).toString(16);
+                    });
+                    materials[i] = new THREE.ParticleBasicMaterial({ size: 0.1 });
+                    materials[i].color = new THREE.Color(color);
+
+                    this.particles[i] = new THREE.ParticleSystem(geometry, materials[i]);
+                    this.particles[i].position.set(positionX, 1, -26);
+                    this.particles[i].sortPosition = true;
+
+                    this.scene.add(this.particles[i]);
                 }
-                // create new mesh from geometry and material
-                var newObject = new THREE.Mesh(newObjectGeometry, newObjectMaterial);
-                newObject.material.side = THREE.DoubleSide; // set object to doublesided
-                newObject.receiveShadow = true; // set receaving shadow
-                // rotate floor to x-z
-                newObject.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-                // set position of floor
-                // !! y an z swaped, because of rotation !!
-                newObject.position = { x: this.posCenter.x, y: this.correctionY, z: -this.posCenter.y };
-                // add floor to scene
-                this.scene.add(newObject);
+            }
+        },
+        animate: {
+            /**
+             * Confetti.animate
+             * e.g.: Confetti.animate();
+             */
+
+            value: function animate() {
+                for (var i = 0; i < this.particles.length; i++) {
+                    if (this.particles[i].position.y < -1) {
+                        this.particles[i].position.y = 1;
+                    }
+                    this.particles[i].position.y -= 0.1 * Math.random();
+                }
             }
         }
     });
 
-    return Floor;
+    return Confetti;
+})();
+
+},{}],3:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Counter = exports.Counter = (function () {
+    /**
+     * constructor
+     * e.g.: new Counter()
+     *
+     * Countdown starts automatically
+     *
+     * @param scene {Object}
+     * @param callback {function} optional
+     */
+
+    function Counter(scene, callback) {
+        _classCallCheck(this, Counter);
+
+        this.scene = scene;
+        this.callback = callback || function () {};
+        this.count = 5;
+        this.timer = null;
+
+        this.start();
+    }
+
+    _createClass(Counter, {
+        start: {
+            /**
+             * Counter.start
+             * e.g.: Counter.start();
+             *
+             * Starts the Countdown with an interval of 1s
+             */
+
+            value: function start() {
+                this.timer = setInterval(this.decrement.bind(this), 1000);
+            }
+        },
+        decrement: {
+            /**
+             * Counter.decrement
+             * e.g.: Counter.decrement();
+             */
+
+            value: function decrement() {
+                this.removeText();
+                --this.count ? this.createText(this.count, 16724787) : this.stop();
+            }
+        },
+        stop: {
+            /**
+             * Counter.decrement
+             * e.g.: Counter.stop();
+             */
+
+            value: function stop() {
+                clearInterval(this.timer);
+                this.createText("GO!", 3407667);
+                this.callback();
+            }
+        },
+        createText: {
+            /**
+             * Counter.decrement
+             * e.g.: Counter.createText("Go!", 0x33ff33);
+             *
+             * Adds the given text to the scene
+             */
+
+            value: function createText(text, color) {
+                this.geometry = new THREE.TextGeometry(text, { font: "helvetiker", height: 1, size: 4, divisions: 1 });
+                this.material = new THREE.MeshLambertMaterial({ color: color, transparent: true, opacity: 1 });
+                this.mesh = new THREE.Mesh(this.geometry, this.material);
+                this.mesh.name = "counter";
+
+                this.mesh.castShadow = true;
+                this.mesh.receiveShadow = true;
+                this.mesh.rotation = { x: 0, y: Math.PI / 2, z: 0 };
+                this.mesh.position = { x: -1, y: 2.1, z: -2 };
+
+                THREE.GeometryUtils.center(this.geometry);
+                this.scene.add(this.mesh);
+            }
+        },
+        removeText: {
+            /**
+             * Counter.decrement
+             * e.g.: Counter.removeText();
+             *
+             * Removes the counter visualisation from the scene
+             */
+
+            value: function removeText() {
+                this.scene.remove(this.scene.getChildByName("counter"));
+            }
+        }
+    });
+
+    return Counter;
 })();
 
 },{}],4:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Environment = exports.Environment = (function () {
+    /**
+     * constructor
+     * e.g.: new Environment()
+     *
+     * Adds Floor, Lines and StartCaption
+     *
+     * @param scene {Object}
+     * @param config {function}
+     */
+
+    function Environment(scene, config) {
+        _classCallCheck(this, Environment);
+
+        this.config = config;
+        this.scene = scene;
+
+        this.lines = [2.8, -1.3, -this.config.finPosZ, -(this.config.finPosZ + 4)];
+
+        this.floors = [{
+            size: {
+                x: this.config.floor_width,
+                y: this.config.floor_height
+            },
+            position: {
+                x: this.config.floor_width / 2,
+                y: -(this.config.floor_height / 2 - 2.9)
+            },
+            texture: "floor_comic.jpg",
+            repeat: this.config.floor_width / 5
+        }, {
+            size: {
+                x: this.config.floor_width * 20,
+                y: this.config.floor_height * 20
+            },
+            position: {
+                x: -(this.config.floor_width * 5),
+                y: -(this.config.floor_height * 5)
+            },
+            texture: "gras.jpg",
+            repeat: this.config.floor_width * 10
+        }];
+
+        this.addFloors();
+        this.addLines();
+        this.addFog();
+        this.addStartCaption();
+    }
+
+    _createClass(Environment, {
+        addFloors: {
+            /**
+             * Environment.addFloors
+             * e.g.: Environment.addFloors();
+             */
+
+            value: function addFloors() {
+                this.group = new THREE.Object3D();
+
+                for (var i = 0; i < this.floors.length; i++) {
+                    var floor = this.floors[i];
+
+                    var texture = THREE.ImageUtils.loadTexture("img/" + floor.texture);
+                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.set(floor.repeat, floor.repeat);
+
+                    var geometry = new THREE.PlaneGeometry(floor.size.x, floor.size.y, 0);
+                    var material = new THREE.MeshLambertMaterial({ map: texture, transparent: true });
+                    var mesh = new THREE.Mesh(geometry, material);
+
+                    mesh.material.side = THREE.DoubleSide;
+                    mesh.receiveShadow = true;
+
+                    mesh.rotation = { x: -Math.PI / 2, y: 0, z: 0 };
+                    mesh.position = { x: floor.position.x, y: -0.01 * (i + 1), z: floor.position.y };
+
+                    this.group.add(mesh);
+                }
+
+                this.scene.add(this.group);
+            }
+        },
+        addLines: {
+            /**
+             * Environment.addLines
+             * e.g.: Environment.addLines();
+             */
+
+            value: function addLines() {
+                this.group = new THREE.Object3D();
+
+                for (var i = this.lines.length; i >= 0; --i) {
+                    var geometry = new THREE.PlaneGeometry(this.config.floor_width, 0.3, 0);
+                    var material = new THREE.MeshLambertMaterial({ color: 16777215, transparent: true, opacity: 0.7 });
+                    var mesh = new THREE.Mesh(geometry, material);
+
+                    mesh.material.side = THREE.DoubleSide;
+                    mesh.receiveShadow = true;
+
+                    mesh.rotation = { x: -Math.PI / 2, y: 0, z: 0 };
+                    mesh.position = { x: this.config.floor_width / 2, y: 0.01, z: this.lines[i] };
+
+                    this.group.add(mesh);
+                }
+
+                this.scene.add(this.group);
+            }
+        },
+        addStartCaption: {
+            /**
+             * Environment.addStartCaption
+             * e.g.: Environment.addStartCaption();
+             *
+             * Adds StartCaptions from 1-4
+             */
+
+            value: function addStartCaption() {
+                this.group = new THREE.Object3D();
+
+                for (var i = 0; i < 4; i++) {
+                    var geometry = new THREE.TextGeometry(i, { font: "helvetiker", height: 0.01, size: 0.9 });
+                    var material = new THREE.MeshLambertMaterial({ color: 16777215 });
+                    var mesh = new THREE.Mesh(geometry, material);
+
+                    mesh.rotation = { x: -Math.PI / 2, y: 0, z: 0 };
+                    mesh.position = { x: this.config.trackWidth * i + this.config.trackWidth / 2, y: 0, z: 1 };
+
+                    THREE.GeometryUtils.center(geometry);
+                    this.group.add(mesh);
+                }
+
+                this.scene.add(this.group);
+            }
+        },
+        addFog: {
+            /**
+             * Environment.addFog
+             * e.g.: Environment.addFog();
+             */
+
+            value: function addFog() {
+                this.scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
+            }
+        },
+        addWinnerCaption: {
+            /**
+             * Environment.addWinnerCaption
+             * e.g.: Environment.addWinnerCaption(1);
+             *
+             * @param track {Number} 1-4
+             */
+
+            value: function addWinnerCaption(track) {
+                this.group = new THREE.Object3D();
+                var text = "CHAMPION 4EVER";
+
+                var geometry = new THREE.TextGeometry(text, { font: "helvetiker", height: 0.01, size: 1.8 });
+                var material = new THREE.MeshLambertMaterial({ color: 16777215, opacity: 0.9 });
+                var mesh = new THREE.Mesh(geometry, material);
+
+                mesh.rotation = { x: -Math.PI / 2, y: 0, z: Math.PI / 2 };
+                mesh.position = { x: this.config.trackWidth * (track - 1) + 1.3, y: 0, z: -12 };
+
+                THREE.GeometryUtils.center(geometry);
+                this.group.add(mesh);
+
+                this.scene.add(this.group);
+            }
+        }
+    });
+
+    return Environment;
+})();
+
+},{}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -273,7 +558,226 @@ var Models = exports.Models = (function () {
     return Models;
 })();
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Renderer = exports.Renderer = (function () {
+    /**
+     * constructor
+     * e.g.: new Renderer()
+     */
+
+    function Renderer(game, scene) {
+        _classCallCheck(this, Renderer);
+
+        this.game = game;
+        this.scene = scene;
+
+        this.addInGameCamera();
+        this.addFinishCamera();
+        this.addMultipleViewports();
+
+        this.addRenderer();
+        this.addPointLight();
+        this.addDirectionalLight();
+        this.setRenderTarget();
+    }
+
+    _createClass(Renderer, {
+        addRenderer: {
+            /**
+             * Renderer.addRenderer
+             * e.g.: Renderer.addRenderer();
+             */
+
+            value: function addRenderer() {
+                this.webglRenderer = new THREE.WebGLRenderer({ antialias: true, clearColor: 12708324, clearAlpha: 1 });
+
+                console.log(window.innerWidth, window.innerHeight);
+                this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
+                this.webglRenderer.sortElements = false;
+
+                this.webglRenderer.shadowMapEnabled = true;
+                this.webglRenderer.shadowMapSoft = true;
+                this.webglRenderer.shadowMapType = THREE.PCFSoftShadowMap;
+                this.webglRenderer.physicallyBasedShading = true;
+
+                console.log(this.camera);
+                THREEx.WindowResize(this.webglRenderer, this.camera);
+            }
+        },
+        addInGameCamera: {
+            /**
+             * Renderer.addInGameCamera
+             * e.g.: Renderer.addInGameCamera();
+             */
+
+            value: function addInGameCamera() {
+                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
+                this.camera.position.set(10, 10, 10);
+                this.camera.lastPosition = new THREE.Vector3(10, 10, 10);
+                this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                this.scene.add(this.camera);
+            }
+        },
+        updateInGameCamera: {
+            /**
+             * Renderer.updateInGameCamera
+             * e.g.: Renderer.updateInGameCamera();
+             *
+             * @param lookAtZ {Number}
+             */
+
+            value: function updateInGameCamera(lookAtZ) {
+                this.camera.target = new THREE.Vector3(0, 0, -lookAtZ);
+                this.camera.lastPosition = this.camera.position;
+                this.camera.lookAt(this.camera.target);
+                this.camera.translateX(lookAtZ / 120);
+            }
+        },
+        addFinishCamera: {
+            /**
+             * Renderer.addFinishCamera
+             * e.g.: Renderer.addFinishCamera();
+             */
+
+            value: function addFinishCamera() {
+                this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
+                this.cameraFinish.position.set(10, 10, 10);
+                this.cameraFinish.lastPosition = new THREE.Vector3(10, 10, 10);
+                this.cameraFinish.lookAt(new THREE.Vector3(0, 0, 0));
+                this.scene.add(this.cameraFinish);
+            }
+        },
+        addMultipleViewports: {
+            /**
+             * Renderer.addMultipleViewports
+             * e.g.: Renderer.addMultipleViewports();
+             */
+
+            value: function addMultipleViewports() {
+                var _this = this;
+                this.views = [{
+                    left: 0, bottom: 0, width: 1, height: 1, eye: [10, 10, 10], up: [0, 1, 0],
+                    updateCamera: function updateCamera(camera) {
+                        camera.position = camera.lastPosition;
+                        camera.lookAt(camera.target);
+                    }
+                }, {
+                    left: 0, bottom: 0.6, width: 0.4, height: 0.4, eye: [0, 10, 0], up: [0, 0, 1],
+                    updateCamera: function updateCamera(camera) {
+                        camera.position.x = camera.position.x * Math.cos(0.1) + Math.sin(0.1);
+                        camera.position.z = camera.position.z * Math.cos(0.1) - Math.sin(0.1);
+                        camera.lookAt(_this.playerSnails.snails[_this.winner].position);
+                    }
+                }];
+
+                this.views[0].camera = this.camera;
+                this.views[1].camera = this.cameraFinish;
+            }
+        },
+        addPointLight: {
+            /**
+             * Renderer.addDirectionalLight
+             * e.g.: Renderer.addDirectionalLight();
+             */
+
+            value: function addPointLight() {
+                var PointLight = new THREE.PointLight(16777215, 0.2);
+                PointLight.position.set(10, 20, -40);
+                this.scene.add(PointLight);
+            }
+        },
+        addDirectionalLight: {
+            /**
+             * Renderer.addDirectionalLight
+             * e.g.: Renderer.addDirectionalLight();
+             */
+
+            value: function addDirectionalLight() {
+                var directionalLight = new THREE.DirectionalLight(16777215, 1);
+                directionalLight.position.set(10, 20, 10);
+
+                directionalLight.shadowDarkness = 0.7;
+                directionalLight.shadowCameraRight = 30;
+                directionalLight.shadowCameraLeft = -30;
+                directionalLight.shadowCameraTop = 30;
+                directionalLight.shadowCameraBottom = -30;
+                directionalLight.shadowCameraNear = 1;
+                directionalLight.shadowCameraFar = 60;
+
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+            }
+        },
+        setRenderTarget: {
+            /**
+             * Renderer.setRenderTarget
+             * e.g.: Renderer.setRenderTarget();
+             */
+
+            value: function setRenderTarget() {
+                var container = document.createElement("div");
+                document.body.appendChild(container);
+                container.id = "viewport";
+                container.appendChild(this.webglRenderer.domElement);
+            }
+        },
+        render: {
+            /**
+             * Renderer.render
+             * e.g.: Renderer.render();
+             */
+
+            value: function render() {
+                if (this.isGameOver) {
+                    this.confetti.animate();
+
+                    //viewports
+                    for (var k = 0; k < this.views.length; ++k) {
+
+                        this.camera = this.views[k].camera;
+                        this.views[k].updateCamera(this.camera, this.scene);
+
+                        var left = Math.floor(window.innerWidth * this.views[k].left);
+                        var bottom = Math.floor(window.innerHeight * this.views[k].bottom);
+                        var width = Math.floor(window.innerWidth * this.views[k].width);
+                        var height = Math.floor(window.innerHeight * this.views[k].height);
+                        this.webglRenderer.setViewport(left, bottom, width, height);
+                        this.webglRenderer.setScissor(left, bottom, width, height);
+                        this.webglRenderer.enableScissorTest(true);
+
+                        this.camera.aspect = width / height;
+                        this.camera.updateProjectionMatrix();
+
+                        this.webglRenderer.render(this.scene, this.camera);
+                    }
+                }
+
+                if (!this.game.isGameOver) {
+                    this.webglRenderer.render(this.scene, this.camera);
+                }
+
+                var _this = this;
+                requestAnimationFrame(function () {});
+            }
+        }
+    });
+
+    return Renderer;
+})();
+
+//_this.render();
+
+},{}],7:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -290,13 +794,24 @@ var Models = require("./3d/Models.js").Models;
 
 var Environment = require("./3d/Environment.js").Environment;
 
+var Counter = require("./3d/Counter.js").Counter;
+
+var Confetti = require("./3d/Confetti.js").Confetti;
+
+var Renderer = require("./3d/Renderer.js").Renderer;
+
 var Game = exports.Game = (function () {
     function Game() {
         _classCallCheck(this, Game);
 
         this.pubsub = new PubSub();
+        this.scene = new THREE.Scene();
+        this.isGameOver = false;
+        this.winnerTrack = 0;
+        this.startTime;
 
         this.config = {
+            trackWidth: 10 / 4,
             floor_width: 10,
             floor_height: 30,
             snailSpeed: 0.9,
@@ -304,187 +819,23 @@ var Game = exports.Game = (function () {
             playerCount: 2
         };
 
-        this.isGameOver = false;
         this.playerSnails = { snails: [] };
-        this.particles = [];
-        this.scene = new THREE.Scene();
-        this.startTime;
-        this.animationFrameID;
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, clearColor: 12708324, clearAlpha: 1 });
-        this.winner = 0;
         this.playerCount = this.config.playerCount;
+
+        this.renderer = new Renderer(this, this.scene);
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
-
-        this.environment = new Environment(this, this.config.floor_width, this.config.floor_height, this.config.finPosZ);
-
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
-        this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
-
-        var _this = this;
-        this.views = [{
-            left: 0,
-            bottom: 0,
-            width: 1,
-            height: 1,
-            eye: [10, 10, 10], //x,y,z position of camera
-            up: [0, 1, 0], //up vector
-            updateCamera: function updateCamera(camera) {
-                camera.position = camera.lastPosition;
-                camera.lookAt(camera.target);
-            }
-        }, {
-            left: 0,
-            bottom: 0.6,
-            width: 0.4,
-            height: 0.4,
-            eye: [0, 10, 0],
-            up: [0, 0, 1],
-            updateCamera: function updateCamera(camera) {
-                // camera.position.set(0,4, playerSnails[winner].position.z-10);
-
-                camera.position.x = camera.position.x * Math.cos(0.1) + Math.sin(0.1);
-                camera.position.z = camera.position.z * Math.cos(0.1) - Math.sin(0.1);
-
-                camera.lookAt(_this.playerSnails.snails[_this.winner].position);
-            }
-        }];
-
-        this.init();
+        this.environment = new Environment(this.scene, this.config);
+        this.counter = new Counter(this.scene, function () {
+            console.log("countdown callback");
+        });
     }
 
     _createClass(Game, {
-        init: {
-            value: function init() {
-
-                // define renderer
-
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.sortElements = false;
-
-                // shadow settings
-                this.renderer.shadowMapEnabled = true;
-                this.renderer.shadowMapSoft = true;
-                this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
-                this.renderer.physicallyBasedShading = true;
-
-                this.cameraFinish.position.set(10, 10, 10); // set position of the camera
-                this.cameraFinish.lastPosition = new THREE.Vector3(10, 10, 10);
-                this.cameraFinish.lookAt(new THREE.Vector3(0, 0, 0)); // scene point camera is looking at
-
-                this.scene.add(this.cameraFinish);
-
-                this.views[0].camera = this.camera;
-                this.views[1].camera = this.cameraFinish;
-
-                // check if WebGl-rendering is supported, otherwise print message
-                if (!Detector.webgl) {
-                    alert("WebGL is not supported or enabled. Please use a modern Browser.");
-                    Detector.addGetWebGLMessage();
-                }
-
-                // set render target
-                var container = document.createElement("div");
-                document.body.appendChild(container);
-                container.id = "viewport";
-                container.appendChild(this.renderer.domElement);
-
-                // create scene object, add fog to scene
-                this.scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
-
-                // camera viewport and configuration, PerspectiveCamera(angle, aspect, near, far)
-                this.camera.position.set(10, 10, 10); // set position of the camera
-                this.camera.lastPosition = new THREE.Vector3(10, 10, 10);
-                this.camera.lookAt(new THREE.Vector3(0, 0, 0)); // scene point camera is looking at
-                this.scene.add(this.camera); // add camera to scene
-                //camera for finish screen
-
-                // point light, THREE.PointLight(color, density)
-                var PointLight = new THREE.PointLight(16777215, 0.2);
-                PointLight.position.set(10, 20, -40); // set position of light
-                this.scene.add(PointLight); // add light to scene
-
-                // directional light, THREE.DirectionalLight(color, density)
-                var directionalLight = new THREE.DirectionalLight(16777215, 1);
-                directionalLight.position.set(10, 20, 10); // set position
-                // shadow settings
-                directionalLight.shadowDarkness = 0.7;
-                directionalLight.shadowCameraRight = 30;
-                directionalLight.shadowCameraLeft = -30;
-                directionalLight.shadowCameraTop = 30;
-                directionalLight.shadowCameraBottom = -30;
-                directionalLight.shadowCameraNear = 1;
-                directionalLight.shadowCameraFar = 60;
-                // enable light is casting shadow
-                directionalLight.castShadow = true;
-                this.scene.add(directionalLight); // add light to scene
-
-                // handling window-resize, 100% height and 100% width
-                THREEx.WindowResize(this.renderer, this.camera);
-            }
-        },
         getEndTime: {
             value: function getEndTime() {
                 var endTime = (new Date().getTime() - this.startTime) / 1000; //highscore-time
                 endTime.toFixed(3);
                 return endTime;
-            }
-        },
-        renderChampionText: {
-            value: function renderChampionText(winID) {
-                // render message in webgl
-                var objName = "winner",
-                    fontheight = 0.01,
-                    fontsize = 1.8,
-                    color = 16777215;
-                var floor_width = 10;
-                this.createCaption("CHAMPION 4EVER", fontheight, fontsize, { x: floor_width / 4 * winID + 1.3, y: 0, z: -12 }, { x: -Math.PI / 2, y: 0, z: Math.PI / 2 }, color, 0.9, objName, true, true);
-            }
-        },
-        addParticleSystem: {
-            value: function addParticleSystem(index) {
-                var materials = [],
-                    size;
-                size = 0.1; // size of particle
-                var x = this.playerSnails.snails[index].position.x;
-
-                for (var i = 0; i < 15; i++) {
-                    var geometry = new THREE.Geometry();
-                    // add particle to particle system
-                    var amount = 1200;
-                    for (var j = 0; j < amount; j++) {
-
-                        var vertex = new THREE.Vector3();
-                        vertex.x = Math.random() * 2 - 1;
-                        vertex.y = Math.random() * 15 - 1;
-                        vertex.z = Math.random() * 30 - 1;
-                        vertex.velocity = new THREE.Vector3(0, -1, 0);
-                        geometry.vertices.push(vertex);
-                    }
-
-                    materials[i] = new THREE.ParticleBasicMaterial({ size: size });
-                    var randomColor = "#000000".replace(/0/g, function () {
-                        return (~ ~(Math.random() * 16)).toString(16);
-                    });
-                    materials[i].color = new THREE.Color(randomColor);
-                    this.particles[i] = new THREE.ParticleSystem(geometry, materials[i]);
-                    this.particles[i].position.set(x, 1, -26);
-                    this.particles[i].sortPosition = true;
-                    this.scene.add(this.particles[i]);
-                }
-            }
-        },
-        animateParticleSystem: {
-
-            //animates the particle system
-
-            value: function animateParticleSystem() {
-
-                for (var i = 0; i < this.particles.length; i++) {
-                    if (this.particles[i].position.y < -1) {
-                        this.particles[i].position.y = 1;
-                    }
-                    this.particles[i].position.y -= 0.1 * Math.random();
-                }
             }
         },
         getFirstAndLastSnailPositionZ: {
@@ -510,11 +861,7 @@ var Game = exports.Game = (function () {
             value: function setCameraInGame() {
                 var position = this.getFirstAndLastSnailPositionZ();
                 var mid = (position.max + position.min) / 2;
-                this.camera.target = new THREE.Vector3(0, 0, -mid);
-                this.camera.lastPosition = this.camera.position;
-                this.camera.lookAt(this.camera.target);
-                //camera.translateX(mid / 96);
-                this.camera.translateX(mid / 120);
+                this.renderer.updateInGameCamera(mid);
             }
         },
         addSlime: {
@@ -591,81 +938,10 @@ var Game = exports.Game = (function () {
                 window.addEventListener("keyup", _this.checkModelMove.bind(_this), false);
             }
         },
-        createCaption: {
-
-            //creates 3D-texts on the scene
-
-            value: function createCaption(text, height, size, position, rotation, color, opacity, name, lambert, shadow) {
-                var material,
-                    shape = new THREE.TextGeometry(text, { font: "helvetiker", weight: "normal",
-                    height: height, style: "normal", size: size, divisions: 1 });
-                // set pivot of text to center of object
-                THREE.GeometryUtils.center(shape);
-                // create material and mesh-object
-                if (lambert) material = new THREE.MeshLambertMaterial({ color: color, transparent: true, opacity: opacity });else material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: opacity });
-
-                var newObject = new THREE.Mesh(shape, material);
-                newObject.name = name;
-
-                newObject.castShadow = shadow.castShadow;
-                newObject.receiveShadow = shadow.receiveShadow;
-
-                // alternative to newObject.rotation is to use THREE.Matrix
-                // newObject.applyMatrix(new THREE.Matrix4().makeRotationZ( Math.PI / 2 ))
-                // newObject.applyMatrix(new THREE.Matrix4().makeRotationX( - Math.PI / 2 ));
-                newObject.rotation = rotation;
-                newObject.position.set(position.x, position.y, position.z);
-                this.scene.add(newObject); // add object to scene
-            }
-        },
         startGame: {
             value: function startGame() {
-
                 this.models.setPlayerSnails(this.playerCount);
-                // set snails, depending on playerCount selected
-
-                // hide lobby with slide effect, duration 1 second
-                $("#lobbyContainer").hide("slide", { direction: "up", easing: "easeInCubic" }, 1000);
-                // objname = needed for select from scene.children
-                var objName = "countdown",
-                    fontheight = 1,
-                    fontsize = 4,
-                    text,
-                    color = 16724787;
-                // loop to render countdown 5
-                // enable user controller on GO!
-                var _this = this;
-                function counter(n) {
-                    (function loop() {
-                        if (--n) {
-                            // sets value of n -= 1 before check 0 or 1
-                            text = n; // set text to current count-value
-                            setTimeout(loop, 1000); // recall loop after 0.1 second
-                        } else {
-                            _this.startTime = new Date().getTime();
-                            text = "GO!", color = 52224;
-                            // enable user controller
-                            _this.addUserInput();
-                        }
-                        // remove old caption
-                        _this.scene.remove(_this.scene.getChildByName(objName));
-                        // add new caption
-                        _this.createCaption(text, fontheight, fontsize, { x: -1, y: 2.1, z: -2 }, { x: 0, y: Math.PI / 2, z: 0 }, color, 1, objName, true, { receiveShadow: true, castShadow: true });
-                        // this.gameStart = new date.timestamp
-                    })();
-                }
-                counter(5); // start coundown
-                this.render(); // start renderer
-            }
-        },
-        setGameOverScreen: {
-            value: function setGameOverScreen() {
-                this.renderChampionText(this.winner);
-                // add ParticleSystem to scene
-                this.addParticleSystem(this.winner);
-
-                //TODO: uncomment after moving camera
-                //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
+                this.renderer.render();
             }
         },
         removeControls: {
@@ -680,44 +956,15 @@ var Game = exports.Game = (function () {
         setGameOver: {
             value: function setGameOver(winID) {
                 this.isGameOver = true;
-                this.winner = winID;
+                this.winnerTrack = winID;
+
+                this.environment.addWinnerCaption(1);
+                this.confetti = new Confetti(this.scene, this.config, 1);
+
+                //TODO: uncomment after moving camera
+                //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
 
                 this.pubsub.publish("game:over", { endTime: this.getEndTime() });
-            }
-        },
-        render: {
-            value: function render() {
-
-                if (this.isGameOver) {
-                    this.animateParticleSystem();
-                    //viewports
-                    for (var k = 0; k < this.views.length; ++k) {
-
-                        this.camera = this.views[k].camera;
-                        this.views[k].updateCamera(this.camera, this.scene);
-
-                        var left = Math.floor(window.innerWidth * this.views[k].left);
-                        var bottom = Math.floor(window.innerHeight * this.views[k].bottom);
-                        var width = Math.floor(window.innerWidth * this.views[k].width);
-                        var height = Math.floor(window.innerHeight * this.views[k].height);
-                        this.renderer.setViewport(left, bottom, width, height);
-                        this.renderer.setScissor(left, bottom, width, height);
-                        this.renderer.enableScissorTest(true);
-
-                        this.camera.aspect = width / height;
-                        this.camera.updateProjectionMatrix();
-
-                        this.renderer.render(this.scene, this.camera);
-                    }
-                }
-
-                // render scene
-                if (!this.isGameOver) this.renderer.render(this.scene, this.camera);
-                // render-loop
-                var _this = this;
-                this.animationFrameID = requestAnimationFrame(function () {
-                    _this.render();
-                });
             }
         }
     });
@@ -725,7 +972,7 @@ var Game = exports.Game = (function () {
     return Game;
 })();
 
-},{"./3d/Environment.js":2,"./3d/Models.js":4,"./PubSub.js":7}],6:[function(require,module,exports){
+},{"./3d/Confetti.js":2,"./3d/Counter.js":3,"./3d/Environment.js":4,"./3d/Models.js":5,"./3d/Renderer.js":6,"./PubSub.js":9}],8:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -816,7 +1063,7 @@ var Highscore = exports.Highscore = (function () {
     return Highscore;
 })();
 
-},{"./PubSub.js":7}],7:[function(require,module,exports){
+},{"./PubSub.js":9}],9:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
