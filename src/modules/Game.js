@@ -143,15 +143,6 @@ export class Game {
         return endTime;
     }
 
-    renderChampionText(winID) {
-        // render message in webgl
-        var objName = "winner", fontheight = 0.01, fontsize = 1.8, color = 0xFFFFFF;
-        var floor_width = 10;
-        this.createCaption("CHAMPION 4EVER", fontheight, fontsize,
-            {x: floor_width / 4 * winID + 1.3, y: 0, z: -12},
-            {x: -Math.PI / 2, y: 0, z: Math.PI / 2},
-            color, 0.9, objName, true, true);
-    }
 
     addParticleSystem(index){
         var materials = [], size;
