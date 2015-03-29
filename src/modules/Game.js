@@ -143,47 +143,6 @@ export class Game {
         return endTime;
     }
 
-
-    addParticleSystem(index){
-        var materials = [], size;
-        size  = 0.1; // size of particle
-        var x = this.playerSnails.snails[index].position.x;
-
-        for (var i = 0; i < 15; i++) {
-            var geometry = new THREE.Geometry();
-            // add particle to particle system
-            var amount = 1200;
-            for ( var j = 0; j < amount; j ++ ) {
-
-                var vertex = new THREE.Vector3();
-                vertex.x = Math.random() * 2 - 1;
-                vertex.y = Math.random() * 15 - 1;
-                vertex.z = Math.random() * 30 - 1;
-                vertex.velocity = new THREE.Vector3(0, -1, 0);
-                geometry.vertices.push( vertex );
-            }
-
-            materials[i] = new THREE.ParticleBasicMaterial( { size: size } );
-            var randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
-            materials[i].color = new THREE.Color(randomColor);
-            this.particles[i] = new THREE.ParticleSystem( geometry, materials[i] );
-            this.particles[i].position.set(x,1,-26);
-            this.particles[i].sortPosition = true;
-            this.scene.add(this.particles[i]);
-        }
-    }
-
-    //animates the particle system
-    animateParticleSystem(){
-
-        for (var i = 0; i < this.particles.length; i++) {
-            if(this.particles[i].position.y < -1){
-                this.particles[i].position.y = 1;
-            }
-            this.particles[i].position.y -= 0.1*Math.random();
-        }
-    }
-
     getFirstAndLastSnailPositionZ(){
         var min = 10, max = 0, element, z;
         for(var i = 0; i < this.playerSnails.snails.length; i++){
