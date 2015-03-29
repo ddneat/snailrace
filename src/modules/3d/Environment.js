@@ -1,64 +1,123 @@
-import { Floor } from './Floor.js';
-
 export class Environment {
-    constructor(game, floor_width, floor_height, finPosZ){
+    /**
+     * constructor
+     * e.g.: new Environment()
+     *
+     * Adds Floor, Lines and StartCaption
+     *
+     * @param scene {Object}
+     * @param config {function}
+     */
+    constructor(scene, config){
+        this.config = config;
+        this.scene = scene;
 
+        this.lines = [ 2.8, -1.3, -this.config.finPosZ, -(this.config.finPosZ + 4)];
 
+        this.floors = [
+            {
+                size: {
+                    x: this.config.floor_width,
+                    y: this.config.floor_height
+                },
+                position: {
+                    x: this.config.floor_width / 2,
+                    y: -(this.config.floor_height / 2 - 2.9)
+                },
+                texture: 'floor_comic.jpg',
+                repeat: this.config.floor_width / 5
+            }, {
+                size: {
+                    x: this.config.floor_width * 20,
+                    y: this.config.floor_height * 20
+                },
+                position: {
+                    x: -(this.config.floor_width * 5),
+                    y: -(this.config.floor_height * 5)
+                },
+                texture: 'gras.jpg',
+                repeat: this.config.floor_width * 10
+            }
+        ];
 
-        // soil floor
-        var soilSize = { width: floor_height * 20, height: floor_height * 20 };
-        var soilPivotCenter = { x: 0, y: 0, z: 0};
-        var soil = new Floor(game.scene, 'gras.jpg', soilSize, soilPivotCenter, -0.01, 1,
-            {x: soilSize.width / 5, y: soilSize.height / 5});
-        soil.addPlaneToScene();
-
-
-
-        // track floor
-        var trackSize = { width: floor_width, height: floor_height };
-        var trackPivotCenter = { x: trackSize.width / 2, y: trackSize.height / 2 - 3, z: 0};
-        var track = new Floor(game.scene, 'floor_comic.jpg', trackSize, trackPivotCenter, 0, 1,
-            {x: trackSize.width / 5, y: trackSize.height / 5});
-        track.addPlaneToScene();
-
-        // add start and finish-lines
-        var opacity = 0.7, linePivotCenter, lineSize = { width: floor_width, height: 0.3};
-        // start: front snale
-        linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 - 3, z: 0};
-        var startCaptionFront = new Floor(game.scene, '', lineSize, linePivotCenter, 0.01, opacity,
-            {x: lineSize.width / 5, y: lineSize.height / 5});
-        startCaptionFront.addPlaneToScene();
-        // start: behind snail
-        linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 + 1, z: 0};
-        var startCaptionBehind = new Floor(game.scene, '', lineSize, linePivotCenter, 0.01, opacity,
-            {x: lineSize.width / 5, y: lineSize.height / 5});
-        startCaptionBehind.addPlaneToScene();
-
-        // finish
-        linePivotCenter = { x: lineSize.width / 2, y: finPosZ, z: 0};
-        var finishLine = new Floor(game.scene, '', lineSize, linePivotCenter, 0.01, opacity,
-            {x: lineSize.width / 5, y: lineSize.height / 5});
-        finishLine.addPlaneToScene();
-
-        // line behind finisharea
-        var finishAreaDeepth = 4;
-        linePivotCenter = { x: lineSize.width / 2, y: finPosZ + finishAreaDeepth, z: 0};
-        var finishLine = new Floor(game.scene, '', lineSize, linePivotCenter, 0.01, opacity,
-            {x: lineSize.width / 5, y: lineSize.height / 5});
-        finishLine.addPlaneToScene();
-
-        var trackAmount = 4, trackWidth = floor_width / trackAmount,
-            fontheight = 0.01, fontsize = 1;
-
-        // create 1-4 start-caption
-        for(var i = 0; i < trackAmount; i++){
-            game.createCaption(i + 1, fontheight, fontsize,
-                { x: trackWidth * i + trackWidth / 2, y: 0, z: 1 },
-                { x: - Math.PI / 2, y: 0, z: 0 },
-                0xFFFFFF, 0.9, "trackCaption" + i, true,
-                { receiveShadow: true, castShadow: false });
-        }
+        this.addFloors();
+        this.addLines();
+        this.addStartCaption();
     }
+    /**
+     * Environment.addFloors
+     * e.g.: Counter.addFloors();
+     */
+    addFloors() {
+        this.group = new THREE.Object3D();
 
+        for(var i = 0; i < this.floors.length; i++) {
+            var floor = this.floors[i];
 
+            var texture  = THREE.ImageUtils.loadTexture('img/' + floor.texture);
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(floor.repeat, floor.repeat);
+
+            var geometry = new THREE.PlaneGeometry(floor.size.x, floor.size.y, 0);
+            var material = new THREE.MeshLambertMaterial({ map: texture, transparent: true });
+
+            var mesh = new THREE.Mesh(geometry, material);
+
+            mesh.material.side = THREE.DoubleSide;
+            mesh.receiveShadow = true;
+
+            mesh.rotation = { x: - Math.PI / 2, y: 0, z: 0 };
+            mesh.position = { x: floor.position.x, y: -0.01 * ( i + 1 ), z: floor.position.y };
+
+            this.group.add(mesh);
+        }
+
+        this.scene.add(this.group);
+    }
+    /**
+     * Environment.addLines
+     * e.g.: Counter.addLines();
+     */
+    addLines() {
+        this.group = new THREE.Object3D();
+
+        for(var i = this.lines.length; i >= 0; --i) {
+            var geometry = new THREE.PlaneGeometry(this.config.floor_width, 0.3, 0);
+            var material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.7 });
+            var mesh = new THREE.Mesh(geometry, material);
+
+            mesh.material.side = THREE.DoubleSide;
+            mesh.receiveShadow = true;
+
+            mesh.rotation = { x: - Math.PI / 2, y: 0, z: 0 };
+            mesh.position = { x: this.config.floor_width / 2, y: 0.01, z: this.lines[i] };
+
+            this.group.add(mesh);
+        }
+
+        this.scene.add(this.group);
+    }
+    /**
+     * Environment.addStartCaption
+     * e.g.: Counter.addStartCaption();
+     *
+     * Adds StartCaptions from 1-4
+     */
+    addStartCaption() {
+        this.group = new THREE.Object3D();
+
+        for(var i = 0; i < 4; i++) {
+            var material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
+            var geometry = new THREE.TextGeometry(i, { font: 'helvetiker', height: 0.01, size: 0.9, divisions: 1 });
+            var mesh = new THREE.Mesh(geometry, material);
+
+            mesh.rotation = { x: - Math.PI / 2, y: 0, z: 0 };
+            mesh.position = { x: this.config.trackWidth * i + this.config.trackWidth / 2, y: 0, z: 1 }
+
+            THREE.GeometryUtils.center(geometry);
+            this.group.add(mesh);
+        }
+
+        this.scene.add(this.group);
+    }
 }
