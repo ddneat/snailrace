@@ -239,40 +239,6 @@ export class Game {
     startGame(){
 
         this.models.setPlayerSnails(this.playerCount);
-        // set snails, depending on playerCount selected
-
-        // hide lobby with slide effect, duration 1 second
-        $('#lobbyContainer').hide("slide", {direction:"up", easing: 'easeInCubic'}, 1000 );
-        // objname = needed for select from scene.children
-        var objName = "countdown", fontheight = 1, fontsize = 4, text, color = 0xff3333;
-        // loop to render countdown 5
-        // enable user controller on GO!
-        var _this = this;
-        function counter(n) {
-            (function loop() {
-                if (--n) { // sets value of n -= 1 before check 0 or 1
-                    text = n; // set text to current count-value
-                    setTimeout(loop, 1000); // recall loop after 0.1 second
-                }
-                else{
-                    _this.startTime = new Date().getTime();
-                    text = "GO!", color = 0x00CC00;
-                    // enable user controller
-                    _this.addUserInput();
-                }
-                // remove old caption
-                _this.scene.remove(_this.scene.getChildByName(objName));
-                // add new caption
-                _this.createCaption(text, fontheight, fontsize,
-                    { x: -1, y: 2.1, z: -2 },
-                    { x: 0, y: Math.PI / 2, z: 0 },
-                    color, 1, objName, true,
-                    { receiveShadow: true, castShadow: true });
-                // this.gameStart = new date.timestamp
-            })();
-        }
-        counter(5.0); // start coundown
-        this.render(); // start renderer
     }
 
 
