@@ -27,9 +27,6 @@ export class Game {
         this.renderer = new Renderer(this, this.scene);
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
         this.environment = new Environment(this.scene, this.config);
-        this.counter = new Counter(this.scene, function() {
-            console.log('countdown callback');
-        });
     }
 
     getEndTime() {
@@ -91,6 +88,7 @@ export class Game {
     }
 
     //moves models on the scene
+    // todo: disable until countdown is over
     modelMove(snailIndex){
         // set new position of snail
         // into negativ z-axis
@@ -106,11 +104,23 @@ export class Game {
         if(Math.abs(this.playerSnails.snails[snailIndex].position.z - halfmodel) >= finPosZ && !this.isGameOver)
             this.setGameOver(snailIndex);
     }
+    /**
+     * Renderer.addCounter
+     * e.g.: Renderer.addCounter();
+     *
+     * @param callback {function) optional
+     */
+    addCounter(callback) {
+        this.counter = new Counter(this.scene, (function() {
+            this.startTime = new Date().getTime();
+            callback && callback();
+        }).bind(this));
+    }
 
     startGame(gameOverCallback){
         this.models.setPlayerSnails(this.playerCount);
+        this.addCounter();
         this.renderer.render();
-        this.startTime = new Date().getTime();
 
         this.gameOverCallback = gameOverCallback;
     }

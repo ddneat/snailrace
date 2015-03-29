@@ -810,11 +810,9 @@ var Renderer = exports.Renderer = (function () {
                 if (this.game.isGameOver) {
                     this.game.confetti.animate();
 
-                    //TODO: refactor winnerSnail
+                    //TODO: refactor winnerSnail and multiple views
                     //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
-
                     this.webglRenderer.render(this.scene, this.camera);
-
                     //viewports
                     /*            for ( var k = 0; k < this.views.length; ++k ) {
                     
@@ -896,9 +894,6 @@ var Game = exports.Game = (function () {
         this.renderer = new Renderer(this, this.scene);
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
         this.environment = new Environment(this.scene, this.config);
-        this.counter = new Counter(this.scene, function () {
-            console.log("countdown callback");
-        });
     }
 
     _createClass(Game, {
@@ -970,6 +965,7 @@ var Game = exports.Game = (function () {
         modelMove: {
 
             //moves models on the scene
+            // todo: disable until countdown is over
 
             value: function modelMove(snailIndex) {
                 // set new position of snail
@@ -986,11 +982,26 @@ var Game = exports.Game = (function () {
                 if (Math.abs(this.playerSnails.snails[snailIndex].position.z - halfmodel) >= finPosZ && !this.isGameOver) this.setGameOver(snailIndex);
             }
         },
+        addCounter: {
+            /**
+             * Renderer.addCounter
+             * e.g.: Renderer.addCounter();
+             *
+             * @param callback {function) optional
+             */
+
+            value: function addCounter(callback) {
+                this.counter = new Counter(this.scene, (function () {
+                    this.startTime = new Date().getTime();
+                    callback && callback();
+                }).bind(this));
+            }
+        },
         startGame: {
             value: function startGame(gameOverCallback) {
                 this.models.setPlayerSnails(this.playerCount);
+                this.addCounter();
                 this.renderer.render();
-                this.startTime = new Date().getTime();
 
                 this.gameOverCallback = gameOverCallback;
             }
