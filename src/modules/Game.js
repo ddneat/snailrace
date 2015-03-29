@@ -286,30 +286,6 @@ export class Game {
         window.addEventListener('keyup', _this.checkModelMove.bind(_this), false);
     }
 
-    //creates 3D-texts on the scene
-    createCaption(text, height, size, position, rotation, color, opacity, name, lambert, shadow){
-        var material, shape = new THREE.TextGeometry(text, { font: 'helvetiker', weight: "normal",
-            height: height, style : "normal", size: size, divisions: 1 });
-        // set pivot of text to center of object
-        THREE.GeometryUtils.center(shape);
-        // create material and mesh-object
-        if(lambert) material = new THREE.MeshLambertMaterial({color: color, transparent: true, opacity: opacity});
-        else material = new THREE.MeshBasicMaterial({color: color, transparent: true, opacity: opacity});
-
-        var newObject = new THREE.Mesh(shape, material);
-        newObject.name = name;
-
-        newObject.castShadow = shadow.castShadow;
-        newObject.receiveShadow = shadow.receiveShadow;
-
-        // alternative to newObject.rotation is to use THREE.Matrix
-        // newObject.applyMatrix(new THREE.Matrix4().makeRotationZ( Math.PI / 2 ))
-        // newObject.applyMatrix(new THREE.Matrix4().makeRotationX( - Math.PI / 2 ));
-        newObject.rotation = rotation;
-        newObject.position.set(position.x, position.y, position.z);
-        this.scene.add(newObject); // add object to scene
-    }
-
     startGame(){
 
         this.models.setPlayerSnails(this.playerCount);
