@@ -3,6 +3,7 @@ import { Models } from './3d/Models.js';
 import { Environment } from './3d/Environment.js';
 import { Counter } from './3d/Counter.js';
 import { Confetti } from './3d/Confetti.js';
+import { Renderer } from './3d/Renderer.js';
 
 export class Game {
 
@@ -22,23 +23,18 @@ export class Game {
         this.playerSnails = {snails: []};
         this.scene = new THREE.Scene();
         this.startTime;
-        this.renderer = new THREE.WebGLRenderer( {antialias: true, clearColor: 0xc1e9e4, clearAlpha: 1 } );
         this.winner = 0;
         this.playerCount = this.config.playerCount;
+
+        this.renderer = new Renderer(this.scene);
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
-
-
-
-
         this.environment = new Environment(this.scene, this.config);
-
         this.counter = new Counter(this.scene, function() {
             console.log('countdown callback');
         });
 
         this.camera = new THREE.PerspectiveCamera(45,  window.innerWidth / window.innerHeight, 0.1, 100000);
         this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100000);
-
         var _this = this;
         this.views = [
             {
@@ -76,17 +72,6 @@ export class Game {
 
     init(){
 
-        // define renderer
-
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.sortElements = false;
-
-        // shadow settings
-        this.renderer.shadowMapEnabled = true;
-        this.renderer.shadowMapSoft = true;
-        this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
-        this.renderer.physicallyBasedShading = true;
-
         this.cameraFinish.position.set(10, 10, 10); // set position of the camera
         this.cameraFinish.lastPosition = new THREE.Vector3(10,10,10);
         this.cameraFinish.lookAt(new THREE.Vector3(0,0,0)); // scene point camera is looking at
@@ -96,17 +81,11 @@ export class Game {
         this.views[0].camera = this.camera;
         this.views[1].camera = this.cameraFinish;
 
-        // check if WebGl-rendering is supported, otherwise print message
-        if (!Detector.webgl){
-            alert("WebGL is not supported or enabled. Please use a modern Browser.");
-            Detector.addGetWebGLMessage();
-        }
-
         // set render target
         var container = document.createElement( 'div' );
         document.body.appendChild( container );
         container.id = 'viewport';
-        container.appendChild( this.renderer.domElement );
+        container.appendChild( this.renderer.webglRenderer.domElement );
 
         // create scene object, add fog to scene
         this.scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
@@ -117,26 +96,6 @@ export class Game {
         this.camera.lookAt(new THREE.Vector3(0,0,0)); // scene point camera is looking at
         this.scene.add(this.camera); // add camera to scene
         //camera for finish screen
-
-        // point light, THREE.PointLight(color, density)
-        var PointLight = new THREE.PointLight(0xffffff, 0.2);
-        PointLight.position.set(10,20,-40); // set position of light
-        this.scene.add(PointLight); // add light to scene
-
-        // directional light, THREE.DirectionalLight(color, density)
-        var directionalLight  = new THREE.DirectionalLight(0xffffff, 1.0);
-        directionalLight.position.set(10,20,10); // set position
-        // shadow settings
-        directionalLight.shadowDarkness = 0.7;
-        directionalLight.shadowCameraRight = 30;
-        directionalLight.shadowCameraLeft = -30;
-        directionalLight.shadowCameraTop = 30;
-        directionalLight.shadowCameraBottom = -30;
-        directionalLight.shadowCameraNear = 1;
-        directionalLight.shadowCameraFar = 60;
-        // enable light is casting shadow
-        directionalLight.castShadow = true;
-        this.scene.add(directionalLight); // add light to scene
 
         // handling window-resize, 100% height and 100% width
         THREEx.WindowResize(this.renderer, this.camera);
@@ -246,14 +205,6 @@ export class Game {
         this.render();
     }
 
-    setGameOverScreen() {
-        this.environment.addWinnerCaption(1);
-        this.confetti = new Confetti(this.scene, this.config, 1);
-
-        //TODO: uncomment after moving camera
-        //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
-    }
-
     removeControls() {
         // keep movement for 3 seconds enabled
         var _this = this;
@@ -265,6 +216,12 @@ export class Game {
     setGameOver(winID){
         this.isGameOver = true;
         this.winner = winID;
+
+        this.environment.addWinnerCaption(1);
+        this.confetti = new Confetti(this.scene, this.config, 1);
+
+        //TODO: uncomment after moving camera
+        //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
 
         this.pubsub.publish('game:over', { endTime: this.getEndTime() });
     }
@@ -284,19 +241,19 @@ export class Game {
                 var bottom = Math.floor( window.innerHeight * this.views[k].bottom );
                 var width  = Math.floor( window.innerWidth  * this.views[k].width );
                 var height = Math.floor( window.innerHeight * this.views[k].height );
-                this.renderer.setViewport( left, bottom, width, height );
-                this.renderer.setScissor( left, bottom, width, height );
-                this.renderer.enableScissorTest ( true );
+                this.renderer.webglRenderer.setViewport( left, bottom, width, height );
+                this.renderer.webglRenderer.setScissor( left, bottom, width, height );
+                this.renderer.webglRenderer.enableScissorTest ( true );
 
                 this.camera.aspect = width / height;
                 this.camera.updateProjectionMatrix();
 
-                this.renderer.render(this.scene, this.camera);
+                this.renderer.webglRenderer.render(this.scene, this.camera);
             }
         }
 
         if(!this.isGameOver) {
-            this.renderer.render(this.scene, this.camera);
+            this.renderer.webglRenderer.render(this.scene, this.camera);
         }
 
         var _this = this;
