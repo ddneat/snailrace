@@ -8,8 +8,9 @@ export class Confetti {
      * @param scene {Object}
      * @param track {Number} 1-4
      */
-    constructor(scene, track) {
+    constructor(scene, config, track) {
         this.scene = scene;
+        this.config = config;
         this.track = track;
 
         this.particles = [];
@@ -21,9 +22,7 @@ export class Confetti {
      */
     init() {
         var materials = [];
-
-        var tracks = [1.5, 4.5, 6.5, 8.9];
-        var x = tracks[this.track - 1];
+        var positionX = this.config.trackWidth * (this.track - 1) + 1.3;
 
         for (var i = 0; i < 15; i++) {
             var geometry = new THREE.Geometry();
@@ -42,7 +41,7 @@ export class Confetti {
             materials[i].color = new THREE.Color(color);
 
             this.particles[i] = new THREE.ParticleSystem( geometry, materials[i] );
-            this.particles[i].position.set(x, 1, -26);
+            this.particles[i].position.set(positionX, 1, -26);
             this.particles[i].sortPosition = true;
 
             this.scene.add(this.particles[i]);
