@@ -1,5 +1,3 @@
-import { PubSub } from './PubSub.js';
-
 export class Highscore {
     /**
      * constructor
@@ -10,8 +8,6 @@ export class Highscore {
      * @param storage {Object} Optional
      */
     constructor(storage) {
-        this.pubsub = new PubSub();
-
         this.storage = storage || localStorage;
         this.storage.getItem('highscore') === undefined && this.storage.setItem('highscore', "[]");
     }
@@ -19,14 +15,14 @@ export class Highscore {
      * Highscore.saveItem
      *
      * @param name {String}
-     * @param time {String}
+     * @param time {Number}
+     * @param callback {function} optional
      */
-    saveItem(name, time) {
+    saveItem(name, time, callback) {
         var data = JSON.parse(this.storage.getItem('highscore'));
         data.push({name: name, time: time});
         this.storage.setItem('highscore', JSON.stringify(data));
-
-        this.pubsub.publish('highscore:saved');
+        callback && callback();
     }
     /**
      * Highscore.getJSON
