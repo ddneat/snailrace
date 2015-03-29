@@ -23,7 +23,8 @@ class Snailrace {
     addStartButton() {
         document.getElementById("startgame").addEventListener('click', (function() {
             $('#lobbyContainer').hide("slide", {direction:"up", easing: 'easeInCubic'}, 1000);
-            this.game.startGame();
+            this.addControls();
+            this.game.startGame(this.gameOverCallback.bind(this));
         }).bind(this), false);
     }
     /**
@@ -47,34 +48,62 @@ class Snailrace {
         });
     }
     /**
+     * Snailrace.playerInput
+     * e.g.: Snailrace.playerInput();
+     */
+    playerInput(e) {
+        if (e.keyCode == 81 || e.which == 81) { // q
+            this.game.modelMove(0);
+        } else if (e.keyCode == 67 || e.which == 67) { // c
+            this.game.modelMove(1);
+        } else if (e.keyCode == 78 || e.which == 78) { // n
+            this.game.modelMove(2);
+        } else if (e.keyCode == 80 || e.which == 80) { // p
+            this.game.modelMove(3);
+        }
+    }
+    /**
+     * Snailrace.addControls
+     * e.g.: Snailrace.addControls();
+     */
+    addControls() {
+        $(window).on('keyup', this.playerInput.bind(this));
+    }
+    /**
+     * Snailrace.removeControls
+     * e.g.: Snailrace.removeControls();
+     */
+    removeControls() {
+        setTimeout(function(){
+            $(window).off('keyup');
+        }, 3000);
+    }
+    /**
      * Snailrace.gameOverCallback
      * e.g.: Snailrace.gameOverCallback();
      */
     gameOverCallback() {
         $('#gameOverInput').show(1200);
-        $('#timeElapsed').html(data.endTime+" Sek.");
-
-        var $playerNameInput = $('#playerName').focus(1200);
+        $('#timeElapsed').html( this.game.endTime + " Sek.");
 
         $('#highscoreBtn').click(function(){
-            this.highscore.saveItem($('#playerName').val(), data.endTime);
+            this.saveHighscore();
         }).bind(this);
 
-        $playerNameInput.keypress(function(e){
-            if(e.keyCode == 13){
-                this.highscore.saveItem($('#playerName').val(), data.endTime);
-            }
+        $('#playerName').focus(1200).keypress(function(e){
+            if(e.keyCode == 13) this.saveHighscore();
         }).bind(this);
 
-        this.game.setGameOverScreen();
-        this.game.removeControls();
+        this.removeControls();
     }
     /**
-     * Snailrace.highscoreSavedCallback
-     * e.g.: Snailrace.highscoreSavedCallback();
+     * Snailrace.saveHighscore
+     * e.g.: Snailrace.saveHighscore();
      */
-    highscoreSavedCallback() {
-        window.location.reload();
+    saveHighscore() {
+        this.highscore.saveItem($('#playerName').val(), this.game.endTime, function() {
+            window.location.reload();
+        });
     }
 }
 

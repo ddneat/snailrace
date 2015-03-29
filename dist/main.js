@@ -38,7 +38,8 @@ var Snailrace = (function () {
             value: function addStartButton() {
                 document.getElementById("startgame").addEventListener("click", (function () {
                     $("#lobbyContainer").hide("slide", { direction: "up", easing: "easeInCubic" }, 1000);
-                    this.game.startGame();
+                    this.addControls();
+                    this.game.startGame(this.gameOverCallback.bind(this));
                 }).bind(this), false);
             }
         },
@@ -68,6 +69,50 @@ var Snailrace = (function () {
                 });
             }
         },
+        playerInput: {
+            /**
+             * Snailrace.playerInput
+             * e.g.: Snailrace.playerInput();
+             */
+
+            value: function playerInput(e) {
+                if (e.keyCode == 81 || e.which == 81) {
+                    // q
+                    this.game.modelMove(0);
+                } else if (e.keyCode == 67 || e.which == 67) {
+                    // c
+                    this.game.modelMove(1);
+                } else if (e.keyCode == 78 || e.which == 78) {
+                    // n
+                    this.game.modelMove(2);
+                } else if (e.keyCode == 80 || e.which == 80) {
+                    // p
+                    this.game.modelMove(3);
+                }
+            }
+        },
+        addControls: {
+            /**
+             * Snailrace.addControls
+             * e.g.: Snailrace.addControls();
+             */
+
+            value: function addControls() {
+                $(window).on("keyup", this.playerInput.bind(this));
+            }
+        },
+        removeControls: {
+            /**
+             * Snailrace.removeControls
+             * e.g.: Snailrace.removeControls();
+             */
+
+            value: function removeControls() {
+                setTimeout(function () {
+                    $(window).off("keyup");
+                }, 3000);
+            }
+        },
         gameOverCallback: {
             /**
              * Snailrace.gameOverCallback
@@ -76,32 +121,29 @@ var Snailrace = (function () {
 
             value: function gameOverCallback() {
                 $("#gameOverInput").show(1200);
-                $("#timeElapsed").html(data.endTime + " Sek.");
-
-                var $playerNameInput = $("#playerName").focus(1200);
+                $("#timeElapsed").html(this.game.endTime + " Sek.");
 
                 $("#highscoreBtn").click(function () {
-                    this.highscore.saveItem($("#playerName").val(), data.endTime);
+                    this.saveHighscore();
                 }).bind(this);
 
-                $playerNameInput.keypress(function (e) {
-                    if (e.keyCode == 13) {
-                        this.highscore.saveItem($("#playerName").val(), data.endTime);
-                    }
+                $("#playerName").focus(1200).keypress(function (e) {
+                    if (e.keyCode == 13) this.saveHighscore();
                 }).bind(this);
 
-                this.game.setGameOverScreen();
-                this.game.removeControls();
+                this.removeControls();
             }
         },
-        highscoreSavedCallback: {
+        saveHighscore: {
             /**
-             * Snailrace.highscoreSavedCallback
-             * e.g.: Snailrace.highscoreSavedCallback();
+             * Snailrace.saveHighscore
+             * e.g.: Snailrace.saveHighscore();
              */
 
-            value: function highscoreSavedCallback() {
-                window.location.reload();
+            value: function saveHighscore() {
+                this.highscore.saveItem($("#playerName").val(), this.game.endTime, function () {
+                    window.location.reload();
+                });
             }
         }
     });
@@ -353,15 +395,15 @@ var Environment = exports.Environment = (function () {
             repeat: this.config.floor_width / 5
         }, {
             size: {
-                x: this.config.floor_width * 20,
-                y: this.config.floor_height * 20
+                x: this.config.floor_width * 40,
+                y: this.config.floor_height * 40
             },
             position: {
-                x: -(this.config.floor_width * 5),
-                y: -(this.config.floor_height * 5)
+                x: -(this.config.floor_width * 10),
+                y: -(this.config.floor_height * 10)
             },
             texture: "gras.jpg",
-            repeat: this.config.floor_width * 10
+            repeat: this.config.floor_width * 20
         }];
 
         this.addFloors();
@@ -630,8 +672,6 @@ var Renderer = exports.Renderer = (function () {
 
             value: function addRenderer() {
                 this.webglRenderer = new THREE.WebGLRenderer({ antialias: true, clearColor: 12708324, clearAlpha: 1 });
-
-                console.log(window.innerWidth, window.innerHeight);
                 this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
                 this.webglRenderer.sortElements = false;
 
@@ -640,7 +680,6 @@ var Renderer = exports.Renderer = (function () {
                 this.webglRenderer.shadowMapType = THREE.PCFSoftShadowMap;
                 this.webglRenderer.physicallyBasedShading = true;
 
-                console.log(this.camera);
                 THREEx.WindowResize(this.webglRenderer, this.camera);
             }
         },
@@ -797,15 +836,15 @@ var Renderer = exports.Renderer = (function () {
                 }
 
                 var _this = this;
-                requestAnimationFrame(function () {});
+                requestAnimationFrame(function () {
+                    _this.render();
+                });
             }
         }
     });
 
     return Renderer;
 })();
-
-//_this.render();
 
 },{}],7:[function(require,module,exports){
 "use strict";
@@ -942,42 +981,12 @@ var Game = exports.Game = (function () {
                 if (Math.abs(this.playerSnails.snails[snailIndex].position.z - halfmodel) >= finPosZ && !this.isGameOver) this.setGameOver(snailIndex);
             }
         },
-        checkModelMove: {
-            value: function checkModelMove(e) {
-                if (e.keyCode == 81 || e.which == 81) {
-                    //81 =q
-                    this.modelMove(0);
-                } else if (e.keyCode == 67 || e.which == 67) {
-                    // 67 = c
-                    this.modelMove(1);
-                } else if (e.keyCode == 78 || e.which == 78) {
-                    // 78 = n
-                    this.modelMove(2);
-                } else if (e.keyCode == 80 || e.which == 80) {
-                    // 80 = p
-                    this.modelMove(3);
-                }
-            }
-        },
-        addUserInput: {
-            value: function addUserInput() {
-                var _this = this;
-                window.addEventListener("keyup", _this.checkModelMove.bind(_this), false);
-            }
-        },
         startGame: {
-            value: function startGame() {
+            value: function startGame(gameOverCallback) {
                 this.models.setPlayerSnails(this.playerCount);
                 this.renderer.render();
-            }
-        },
-        removeControls: {
-            value: function removeControls() {
-                // keep movement for 3 seconds enabled
-                var _this = this;
-                setTimeout(function () {
-                    window.removeEventListener("keyup", _this.checkModelMove.bind(_this), false);
-                }, 3000);
+
+                this.gameOverCallback = gameOverCallback;
             }
         },
         setGameOver: {
@@ -991,7 +1000,8 @@ var Game = exports.Game = (function () {
                 //TODO: uncomment after moving camera
                 //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
 
-                this.pubsub.publish("game:over", { endTime: this.getEndTime() });
+                this.endTime = this.getEndTime();
+                this.gameOverCallback();
             }
         }
     });
@@ -1033,15 +1043,15 @@ var Highscore = exports.Highscore = (function () {
              * Highscore.saveItem
              *
              * @param name {String}
-             * @param time {String}
+             * @param time {Number}
+             * @param callback {function} optional
              */
 
-            value: function saveItem(name, time) {
+            value: function saveItem(name, time, callback) {
                 var data = JSON.parse(this.storage.getItem("highscore"));
                 data.push({ name: name, time: time });
                 this.storage.setItem("highscore", JSON.stringify(data));
-
-                this.pubsub.publish("highscore:saved");
+                callback && callback();
             }
         },
         getJSON: {
