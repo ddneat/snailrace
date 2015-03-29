@@ -1,6 +1,8 @@
 import { PubSub } from './PubSub.js';
 import { Models } from './3d/Models.js';
 import { Environment } from './3d/Environment.js';
+import { Counter } from './3d/Counter.js';
+import { Confetti } from './3d/Confetti.js';
 
 export class Game {
 
@@ -8,6 +10,7 @@ export class Game {
         this.pubsub = new PubSub();
 
         this.config = {
+            trackWidth: 10 / 4,
             floor_width: 10,
             floor_height: 30,
             snailSpeed: 0.9,
@@ -17,16 +20,21 @@ export class Game {
 
         this.isGameOver = false;
         this.playerSnails = {snails: []};
-        this.particles = [];
         this.scene = new THREE.Scene();
         this.startTime;
-        this.animationFrameID;
         this.renderer = new THREE.WebGLRenderer( {antialias: true, clearColor: 0xc1e9e4, clearAlpha: 1 } );
         this.winner = 0;
         this.playerCount = this.config.playerCount;
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
 
-        this.environment = new Environment(this, this.config.floor_width, this.config.floor_height, this.config.finPosZ);
+
+
+
+        this.environment = new Environment(this.scene, this.config);
+
+        this.counter = new Counter(this.scene, function() {
+            console.log('countdown callback');
+        });
 
         this.camera = new THREE.PerspectiveCamera(45,  window.innerWidth / window.innerHeight, 0.1, 100000);
         this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100000);
@@ -62,9 +70,6 @@ export class Game {
                 }
             }
         ];
-
-
-
 
         this.init();
     }
@@ -237,16 +242,13 @@ export class Game {
     }
 
     startGame(){
-
         this.models.setPlayerSnails(this.playerCount);
+        this.render();
     }
 
-
-
     setGameOverScreen() {
-        this.renderChampionText(this.winner);
-        // add ParticleSystem to scene
-        this.addParticleSystem(this.winner);
+        this.environment.addWinnerCaption(1);
+        this.confetti = new Confetti(this.scene, this.config, 1);
 
         //TODO: uncomment after moving camera
         //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
@@ -270,7 +272,8 @@ export class Game {
     render(){
 
         if(this.isGameOver){
-            this.animateParticleSystem();
+            this.confetti.animate();
+
             //viewports
             for ( var k = 0; k < this.views.length; ++k ) {
 
@@ -292,10 +295,10 @@ export class Game {
             }
         }
 
-        // render scene
-        if(!this.isGameOver)
+        if(!this.isGameOver) {
             this.renderer.render(this.scene, this.camera);
-        // render-loop
+        }
+
         var _this = this;
         this.animationFrameID = requestAnimationFrame(function(){
             _this.render();
