@@ -46,7 +46,7 @@ export class Environment {
     }
     /**
      * Environment.addFloors
-     * e.g.: Counter.addFloors();
+     * e.g.: Environment.addFloors();
      */
     addFloors() {
         this.group = new THREE.Object3D();
@@ -60,7 +60,6 @@ export class Environment {
 
             var geometry = new THREE.PlaneGeometry(floor.size.x, floor.size.y, 0);
             var material = new THREE.MeshLambertMaterial({ map: texture, transparent: true });
-
             var mesh = new THREE.Mesh(geometry, material);
 
             mesh.material.side = THREE.DoubleSide;
@@ -76,7 +75,7 @@ export class Environment {
     }
     /**
      * Environment.addLines
-     * e.g.: Counter.addLines();
+     * e.g.: Environment.addLines();
      */
     addLines() {
         this.group = new THREE.Object3D();
@@ -99,7 +98,7 @@ export class Environment {
     }
     /**
      * Environment.addStartCaption
-     * e.g.: Counter.addStartCaption();
+     * e.g.: Environment.addStartCaption();
      *
      * Adds StartCaptions from 1-4
      */
@@ -107,8 +106,8 @@ export class Environment {
         this.group = new THREE.Object3D();
 
         for(var i = 0; i < 4; i++) {
+            var geometry = new THREE.TextGeometry(i, { font: 'helvetiker', height: 0.01, size: 0.9 });
             var material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
-            var geometry = new THREE.TextGeometry(i, { font: 'helvetiker', height: 0.01, size: 0.9, divisions: 1 });
             var mesh = new THREE.Mesh(geometry, material);
 
             mesh.rotation = { x: - Math.PI / 2, y: 0, z: 0 };
@@ -117,6 +116,28 @@ export class Environment {
             THREE.GeometryUtils.center(geometry);
             this.group.add(mesh);
         }
+
+        this.scene.add(this.group);
+    }
+    /**
+     * Environment.addWinnerCaption
+     * e.g.: Environment.addWinnerCaption(1);
+     *
+     * @param track {Number} 1-4
+     */
+    addWinnerCaption(track) {
+        this.group = new THREE.Object3D();
+        var text = 'CHAMPION 4EVER';
+
+        var geometry = new THREE.TextGeometry(text, { font: 'helvetiker', height: 0.01, size: 1.8 });
+        var material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, opacity: 0.9 });
+        var mesh = new THREE.Mesh(geometry, material);
+
+        mesh.rotation = { x: - Math.PI / 2, y: 0, z: Math.PI / 2 };
+        mesh.position = { x: this.config.trackWidth * (track - 1) + 1.3, y: 0, z: -12 }
+
+        THREE.GeometryUtils.center(geometry);
+        this.group.add(mesh);
 
         this.scene.add(this.group);
     }
