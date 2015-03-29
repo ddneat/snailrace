@@ -28,20 +28,21 @@ export class Environment {
                 repeat: this.config.floor_width / 5
             }, {
                 size: {
-                    x: this.config.floor_width * 20,
-                    y: this.config.floor_height * 20
+                    x: this.config.floor_width * 40,
+                    y: this.config.floor_height * 40
                 },
                 position: {
-                    x: -(this.config.floor_width * 5),
-                    y: -(this.config.floor_height * 5)
+                    x: -(this.config.floor_width * 10),
+                    y: -(this.config.floor_height * 10)
                 },
                 texture: 'gras.jpg',
-                repeat: this.config.floor_width * 10
+                repeat: this.config.floor_width * 20
             }
         ];
 
         this.addFloors();
         this.addLines();
+        this.addFog();
         this.addStartCaption();
     }
     /**
@@ -118,6 +119,13 @@ export class Environment {
         }
 
         this.scene.add(this.group);
+    }
+    /**
+     * Environment.addFog
+     * e.g.: Environment.addFog();
+     */
+    addFog() {
+        this.scene.fog = new THREE.FogExp2("#c1e9e4", 0.01, 10);
     }
     /**
      * Environment.addWinnerCaption
