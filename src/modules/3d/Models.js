@@ -1,19 +1,24 @@
+import { Model } from './Model.js';
+import { Snail } from './Snail.js';
+
 export class Models {
-    constructor(options) {
-        this.modelsToLoad = 0;
+    constructor(options, config) {
+        this.modelsToLoad = 5;
         this.snailModels = [];
         this.playerSnails = options.playerSnails;
         this.sceneModels = [];
         this.scene = options.scene;
+        this.config = config;
 
-        var snailScale = {x: 1, y: 1, z: 1};
-        var snailPosition = {x: 1, y: 0, z: 1};
-        this.loadModel(this.snailModels, 'snailmodelGreen', snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, 'snailmodelBlue', snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, 'snailmodelGreen', snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, 'snailmodelRed', snailScale, snailPosition, false);
+        new Snail(this.snailModels, 'snailmodelGreen', {}, this.loadComplete.bind(this));
+        new Snail(this.snailModels, 'snailmodelBlue', {}, this.loadComplete.bind(this));
+        new Snail(this.snailModels, 'snailmodelRed', {}, this.loadComplete.bind(this));
+        new Snail(this.snailModels, 'snailmodelYellow', {}, this.loadComplete.bind(this));
 
-        this.loadModel(this.sceneModels, 'flag', {x: 0.1, y: 0.1, z: 0.1}, { x:5, y:0, z:-20}, true);
+        new Model(this.sceneModels, 'flag', {scale: {x: 0.1, y: 0.1, z: 0.1}, position: { x:5, y:0, z:-20}}, (function(object){
+            this.scene.add(object.model);
+            this.loadComplete();
+        }).bind(this));
     }
 
     setPlayerSnails(playerCount){
@@ -23,41 +28,10 @@ export class Models {
     };
 
     setSingleSnail(playerNumber){
-        var  floor_width = 10;
-        var trackWidth = floor_width / 4;
-        var newModel = this.snailModels[playerNumber].clone();
-        newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
-        this.playerSnails.snails.push(newModel);
-        this.playerSnails.snails[playerNumber].slimeCounter = 0;
-        this.scene.add(newModel);
+        this.snailModels[playerNumber].model.position.x = this.config.trackWidth / 2 + this.config.trackWidth * playerNumber;
+        this.playerSnails.snails.push(this.snailModels[playerNumber]);
+        this.scene.add(this.snailModels[playerNumber].model);
     };
-
-    loadModel(modelArray, modelName, scale, position, pushToScene) {
-        var newModel;
-        this.modelsToLoad++;
-        var _this = this;
-
-        var loader = new THREE.OBJMTLLoader();
-        loader.addEventListener('load', function (event){
-            newModel = event.content;
-
-            newModel.traverse( function ( child ) {
-                if ( child instanceof THREE.Mesh ) {
-                    child.castShadow = true;
-                }
-            } );
-
-            newModel.updateMatrix();
-            newModel.scale.set(scale.x,scale.y,scale.z);
-            newModel.position.set(position.x, position.y, position.z);
-
-            modelArray.push(newModel);
-            if(pushToScene) _this.scene.add(newModel);
-            _this.loadComplete();
-
-        }, false);
-        loader.load("models/" + modelName + ".obj", "models/" + modelName + ".mtl");
-    }
 
     loadComplete(){
         this.modelsToLoad--;

@@ -16,7 +16,7 @@ export class Game {
             trackWidth: 10 / 4,
             floor_width: 10,
             floor_height: 30,
-            snailSpeed: 0.9,
+            snailSpeed: 0.1,
             finPosZ: 23,
             playerCount: 2
         };
@@ -25,7 +25,7 @@ export class Game {
         this.playerCount = this.config.playerCount;
 
         this.renderer = new Renderer(this, this.scene);
-        this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
+        this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails }, this.config);
         this.environment = new Environment(this.scene, this.config);
     }
 
@@ -38,7 +38,7 @@ export class Game {
     getFirstAndLastSnailPositionZ(){
         var min = 10, max = 0, element, z;
         for(var i = 0; i < this.playerSnails.snails.length; i++){
-            element = this.playerSnails.snails[i];
+            element = this.playerSnails.snails[i].model;
             z = Math.abs(element.position.z);
             if(z < min){ min = z; }
             if(z > max){ max = z; }
@@ -79,7 +79,7 @@ export class Game {
 
             slime.doubleSided = true;
             slime.receiveShadow = true;
-            slime.position.set(this.playerSnails.snails[snailIndex].position.x, this.playerSnails.snails[snailIndex].position.y+0.03, this.playerSnails.snails[snailIndex].position.z+0.8);
+            slime.position.set(this.playerSnails.snails[snailIndex].model.position.x, this.playerSnails.snails[snailIndex].model.position.y+0.03, this.playerSnails.snails[snailIndex].model.position.z+0.8);
             slime.rotation.set(-(90*Math.PI/180), 0, 0);
             this.scene.add(slime);
         }
@@ -93,7 +93,7 @@ export class Game {
         // set new position of snail
         // into negativ z-axis
         var snailSpeed = 0.9;
-        this.playerSnails.snails[snailIndex].position.z -= snailSpeed;
+        this.playerSnails.snails[snailIndex].model.position.z -= snailSpeed;
         this.addSlime(snailIndex);
         // if devCam is not enabled, set camera to new position
         this.setCameraInGame();
@@ -101,7 +101,7 @@ export class Game {
         // check if user reached finish
         var halfmodel = 1.3; // model-pivot is center, with halfmodel -> head
         var finPosZ = 23;
-        if(Math.abs(this.playerSnails.snails[snailIndex].position.z - halfmodel) >= finPosZ && !this.isGameOver)
+        if(Math.abs(this.playerSnails.snails[snailIndex].model.position.z - halfmodel) >= finPosZ && !this.isGameOver)
             this.setGameOver(snailIndex);
     }
     /**

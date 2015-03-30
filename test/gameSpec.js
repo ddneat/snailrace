@@ -1,7 +1,11 @@
+global.self = {};
+global.window = {};
+global.document = {};
+global.THREE = require('three');
 import assert from 'assert';
 import { Game } from '../src/modules/Game.js';
 
-xdescribe('Game', function() {
+describe.skip('Game', function() {
     describe('setGameOver', function() {
 
         it('is game over', function () {

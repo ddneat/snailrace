@@ -153,7 +153,7 @@ var Snailrace = (function () {
 
 new Snailrace();
 
-},{"./modules/Game.js":7,"./modules/Highscore.js":8}],2:[function(require,module,exports){
+},{"./modules/Game.js":9,"./modules/Highscore.js":10}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -548,49 +548,24 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var Models = exports.Models = (function () {
-    function Models(options) {
-        _classCallCheck(this, Models);
+var Model = exports.Model = (function () {
+    function Model(modelArray, modelName, config, loadedCallback) {
+        _classCallCheck(this, Model);
 
-        this.modelsToLoad = 0;
-        this.snailModels = [];
-        this.playerSnails = options.playerSnails;
-        this.sceneModels = [];
-        this.scene = options.scene;
+        this.modelArray = modelArray;
+        this.modelName = modelName;
+        this.scale = config.scale || { x: 1, y: 1, z: 1 };
+        this.position = config.position || { x: 1, y: 0, z: 1 };
+        this.loadedCallback = loadedCallback;
+        this.model = undefined;
 
-        var snailScale = { x: 1, y: 1, z: 1 };
-        var snailPosition = { x: 1, y: 0, z: 1 };
-        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, "snailmodelBlue", snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, "snailmodelGreen", snailScale, snailPosition, false);
-        this.loadModel(this.snailModels, "snailmodelRed", snailScale, snailPosition, false);
-
-        this.loadModel(this.sceneModels, "flag", { x: 0.1, y: 0.1, z: 0.1 }, { x: 5, y: 0, z: -20 }, true);
+        this.loadModel();
     }
 
-    _createClass(Models, {
-        setPlayerSnails: {
-            value: function setPlayerSnails(playerCount) {
-                for (var i = 0; i < playerCount; i++) {
-                    this.setSingleSnail(i);
-                }
-            }
-        },
-        setSingleSnail: {
-            value: function setSingleSnail(playerNumber) {
-                var floor_width = 10;
-                var trackWidth = floor_width / 4;
-                var newModel = this.snailModels[playerNumber].clone();
-                newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
-                this.playerSnails.snails.push(newModel);
-                this.playerSnails.snails[playerNumber].slimeCounter = 0;
-                this.scene.add(newModel);
-            }
-        },
+    _createClass(Model, {
         loadModel: {
-            value: function loadModel(modelArray, modelName, scale, position, pushToScene) {
+            value: function loadModel() {
                 var newModel;
-                this.modelsToLoad++;
                 var _this = this;
 
                 var loader = new THREE.OBJMTLLoader();
@@ -604,14 +579,71 @@ var Models = exports.Models = (function () {
                     });
 
                     newModel.updateMatrix();
-                    newModel.scale.set(scale.x, scale.y, scale.z);
-                    newModel.position.set(position.x, position.y, position.z);
+                    newModel.scale.set(_this.scale.x, _this.scale.y, _this.scale.z);
+                    newModel.position.set(_this.position.x, _this.position.y, _this.position.z);
 
-                    modelArray.push(newModel);
-                    if (pushToScene) _this.scene.add(newModel);
-                    _this.loadComplete();
+                    _this.model = newModel;
+                    _this.modelArray.push(_this);
+                    _this.loadedCallback(_this);
                 }, false);
-                loader.load("models/" + modelName + ".obj", "models/" + modelName + ".mtl");
+                loader.load("models/" + this.modelName + ".obj", "models/" + this.modelName + ".mtl");
+            }
+        }
+    });
+
+    return Model;
+})();
+
+},{}],6:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Model = require("./Model.js").Model;
+
+var Snail = require("./Snail.js").Snail;
+
+var Models = exports.Models = (function () {
+    function Models(options, config) {
+        _classCallCheck(this, Models);
+
+        this.modelsToLoad = 5;
+        this.snailModels = [];
+        this.playerSnails = options.playerSnails;
+        this.sceneModels = [];
+        this.scene = options.scene;
+        this.config = config;
+
+        new Snail(this.snailModels, "snailmodelGreen", {}, this.loadComplete.bind(this));
+        new Snail(this.snailModels, "snailmodelBlue", {}, this.loadComplete.bind(this));
+        new Snail(this.snailModels, "snailmodelRed", {}, this.loadComplete.bind(this));
+        new Snail(this.snailModels, "snailmodelYellow", {}, this.loadComplete.bind(this));
+
+        new Model(this.sceneModels, "flag", { scale: { x: 0.1, y: 0.1, z: 0.1 }, position: { x: 5, y: 0, z: -20 } }, (function (object) {
+            this.scene.add(object.model);
+            this.loadComplete();
+        }).bind(this));
+    }
+
+    _createClass(Models, {
+        setPlayerSnails: {
+            value: function setPlayerSnails(playerCount) {
+                for (var i = 0; i < playerCount; i++) {
+                    this.setSingleSnail(i);
+                }
+            }
+        },
+        setSingleSnail: {
+            value: function setSingleSnail(playerNumber) {
+                this.snailModels[playerNumber].model.position.x = this.config.trackWidth / 2 + this.config.trackWidth * playerNumber;
+                this.playerSnails.snails.push(this.snailModels[playerNumber]);
+                this.scene.add(this.snailModels[playerNumber].model);
             }
         },
         loadComplete: {
@@ -630,7 +662,7 @@ var Models = exports.Models = (function () {
     return Models;
 })();
 
-},{}],6:[function(require,module,exports){
+},{"./Model.js":5,"./Snail.js":8}],7:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -849,7 +881,35 @@ var Renderer = exports.Renderer = (function () {
     return Renderer;
 })();
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+"use strict";
+
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var Model = require("./Model.js").Model;
+
+var Snail = exports.Snail = (function (_Model) {
+    function Snail(modelArray, modelName, config, loadedCallback) {
+        _classCallCheck(this, Snail);
+
+        _get(Object.getPrototypeOf(Snail.prototype), "constructor", this).call(this, modelArray, modelName, config, loadedCallback);
+        this.slimeCounter = 0;
+    }
+
+    _inherits(Snail, _Model);
+
+    return Snail;
+})(Model);
+
+},{"./Model.js":5}],9:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -883,7 +943,7 @@ var Game = exports.Game = (function () {
             trackWidth: 10 / 4,
             floor_width: 10,
             floor_height: 30,
-            snailSpeed: 0.9,
+            snailSpeed: 0.1,
             finPosZ: 23,
             playerCount: 2
         };
@@ -892,7 +952,7 @@ var Game = exports.Game = (function () {
         this.playerCount = this.config.playerCount;
 
         this.renderer = new Renderer(this, this.scene);
-        this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
+        this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails }, this.config);
         this.environment = new Environment(this.scene, this.config);
     }
 
@@ -911,7 +971,7 @@ var Game = exports.Game = (function () {
                     element,
                     z;
                 for (var i = 0; i < this.playerSnails.snails.length; i++) {
-                    element = this.playerSnails.snails[i];
+                    element = this.playerSnails.snails[i].model;
                     z = Math.abs(element.position.z);
                     if (z < min) {
                         min = z;
@@ -954,7 +1014,7 @@ var Game = exports.Game = (function () {
 
                     slime.doubleSided = true;
                     slime.receiveShadow = true;
-                    slime.position.set(this.playerSnails.snails[snailIndex].position.x, this.playerSnails.snails[snailIndex].position.y + 0.03, this.playerSnails.snails[snailIndex].position.z + 0.8);
+                    slime.position.set(this.playerSnails.snails[snailIndex].model.position.x, this.playerSnails.snails[snailIndex].model.position.y + 0.03, this.playerSnails.snails[snailIndex].model.position.z + 0.8);
                     slime.rotation.set(-(90 * Math.PI / 180), 0, 0);
                     this.scene.add(slime);
                 }
@@ -971,7 +1031,7 @@ var Game = exports.Game = (function () {
                 // set new position of snail
                 // into negativ z-axis
                 var snailSpeed = 0.9;
-                this.playerSnails.snails[snailIndex].position.z -= snailSpeed;
+                this.playerSnails.snails[snailIndex].model.position.z -= snailSpeed;
                 this.addSlime(snailIndex);
                 // if devCam is not enabled, set camera to new position
                 this.setCameraInGame();
@@ -979,7 +1039,7 @@ var Game = exports.Game = (function () {
                 // check if user reached finish
                 var halfmodel = 1.3; // model-pivot is center, with halfmodel -> head
                 var finPosZ = 23;
-                if (Math.abs(this.playerSnails.snails[snailIndex].position.z - halfmodel) >= finPosZ && !this.isGameOver) this.setGameOver(snailIndex);
+                if (Math.abs(this.playerSnails.snails[snailIndex].model.position.z - halfmodel) >= finPosZ && !this.isGameOver) this.setGameOver(snailIndex);
             }
         },
         addCounter: {
@@ -1024,7 +1084,7 @@ var Game = exports.Game = (function () {
     return Game;
 })();
 
-},{"./3d/Confetti.js":2,"./3d/Counter.js":3,"./3d/Environment.js":4,"./3d/Models.js":5,"./3d/Renderer.js":6}],8:[function(require,module,exports){
+},{"./3d/Confetti.js":2,"./3d/Counter.js":3,"./3d/Environment.js":4,"./3d/Models.js":6,"./3d/Renderer.js":7}],10:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -1063,7 +1123,7 @@ var Highscore = exports.Highscore = (function () {
              */
 
             value: function saveItem(name, time, callback) {
-                var data = JSON.parse(this.storage.getItem("highscore"));
+                var data = JSON.parse(this.storage.getItem("highscore")) || [];
                 data.push({ name: name, time: time });
                 this.storage.setItem("highscore", JSON.stringify(data));
                 callback && callback();
@@ -1078,7 +1138,7 @@ var Highscore = exports.Highscore = (function () {
 
             value: function getJSON() {
                 var storageContent = JSON.parse(this.storage.getItem("highscore"));
-                if (!storageContent.length) {
+                if (!storageContent) {
                     return [];
                 }return storageContent.sort(function (a, b) {
                     return a.time < b.time ? -1 : 1;
