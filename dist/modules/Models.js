@@ -38,8 +38,8 @@ var Models = exports.Models = (function () {
         },
         setSingleSnail: {
             value: function setSingleSnail(playerNumber) {
-                var floor_width = 10;
-                var trackWidth = floor_width / 4;
+                var floorWidth = 10;
+                var trackWidth = floorWidth / 4;
                 var newModel = this.snailModels[playerNumber].clone();
                 newModel.position.x = trackWidth / 2 + trackWidth * playerNumber;
                 this.playerSnails.snails.push(newModel);

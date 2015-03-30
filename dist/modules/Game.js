@@ -21,8 +21,8 @@ var Game = exports.Game = (function () {
         this.pubsub = new PubSub();
 
         this.config = {
-            floor_width: 10,
-            floor_height: 30,
+            floorWidth: 10,
+            floorHeight: 30,
             snailSpeed: 0.9,
             finPosZ: 23,
             playerCount: 2
@@ -39,7 +39,7 @@ var Game = exports.Game = (function () {
         this.playerCount = this.config.playerCount;
         this.models = new Models({ scene: this.scene, playerSnails: this.playerSnails });
 
-        this.environment = new Environment(this, this.config.floor_width, this.config.floor_height, this.config.finPosZ);
+        this.environment = new Environment(this, this.config.floorWidth, this.config.floorHeight, this.config.finPosZ);
 
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
         this.cameraFinish = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
@@ -160,8 +160,8 @@ var Game = exports.Game = (function () {
                     fontheight = 0.01,
                     fontsize = 1.8,
                     color = 16777215;
-                var floor_width = 10;
-                this.createCaption("CHAMPION 4EVER", fontheight, fontsize, { x: floor_width / 4 * winID + 1.3, y: 0, z: -12 }, { x: -Math.PI / 2, y: 0, z: Math.PI / 2 }, color, 0.9, objName, true, true);
+                var floorWidth = 10;
+                this.createCaption("CHAMPION 4EVER", fontheight, fontsize, { x: floorWidth / 4 * winID + 1.3, y: 0, z: -12 }, { x: -Math.PI / 2, y: 0, z: Math.PI / 2 }, color, 0.9, objName, true, true);
             }
         },
         addParticleSystem: {

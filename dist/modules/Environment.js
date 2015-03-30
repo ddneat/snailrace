@@ -8,17 +8,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var Floor = require("./Floor.js").Floor;
 
-var Environment = exports.Environment = function Environment(game, floor_width, floor_height, finPosZ) {
+var Environment = exports.Environment = function Environment(game, floorWidth, floorHeight, finPosZ) {
     _classCallCheck(this, Environment);
 
     // soil floor
-    var soilSize = { width: floor_height * 20, height: floor_height * 20 };
+    var soilSize = { width: floorHeight * 20, height: floorHeight * 20 };
     var soilPivotCenter = { x: 0, y: 0, z: 0 };
     var soil = new Floor(game.scene, "gras.jpg", soilSize, soilPivotCenter, -0.01, 1, { x: soilSize.width / 5, y: soilSize.height / 5 });
     soil.addPlaneToScene();
 
     // track floor
-    var trackSize = { width: floor_width, height: floor_height };
+    var trackSize = { width: floorWidth, height: floorHeight };
     var trackPivotCenter = { x: trackSize.width / 2, y: trackSize.height / 2 - 3, z: 0 };
     var track = new Floor(game.scene, "floor_comic.jpg", trackSize, trackPivotCenter, 0, 1, { x: trackSize.width / 5, y: trackSize.height / 5 });
     track.addPlaneToScene();
@@ -26,7 +26,7 @@ var Environment = exports.Environment = function Environment(game, floor_width, 
     // add start and finish-lines
     var opacity = 0.7,
         linePivotCenter,
-        lineSize = { width: floor_width, height: 0.3 };
+        lineSize = { width: floorWidth, height: 0.3 };
     // start: front snale
     linePivotCenter = { x: lineSize.width / 2, y: lineSize.height / 2 - 3, z: 0 };
     var startCaptionFront = new Floor(game.scene, "", lineSize, linePivotCenter, 0.01, opacity, { x: lineSize.width / 5, y: lineSize.height / 5 });
@@ -48,7 +48,7 @@ var Environment = exports.Environment = function Environment(game, floor_width, 
     finishLine.addPlaneToScene();
 
     var trackAmount = 4,
-        trackWidth = floor_width / trackAmount,
+        trackWidth = floorWidth / trackAmount,
         fontheight = 0.01,
         fontsize = 1;
 

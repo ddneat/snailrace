@@ -14,8 +14,8 @@ export class Game {
 
         this.config = {
             trackWidth: 10 / 4,
-            floor_width: 10,
-            floor_height: 30,
+            floorWidth: 10,
+            floorHeight: 30,
             snailSpeed: 0.1,
             finPosZ: 23,
             playerCount: 2

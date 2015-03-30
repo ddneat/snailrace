@@ -17,26 +17,26 @@ export class Environment {
         this.floors = [
             {
                 size: {
-                    x: this.config.floor_width,
-                    y: this.config.floor_height
+                    x: this.config.floorWidth,
+                    y: this.config.floorHeight
                 },
                 position: {
-                    x: this.config.floor_width / 2,
-                    y: -(this.config.floor_height / 2 - 2.9)
+                    x: this.config.floorWidth / 2,
+                    y: -(this.config.floorHeight / 2 - 2.9)
                 },
                 texture: 'floor_comic.jpg',
-                repeat: this.config.floor_width / 5
+                repeat: this.config.floorWidth / 5
             }, {
                 size: {
-                    x: this.config.floor_width * 40,
-                    y: this.config.floor_height * 40
+                    x: this.config.floorWidth * 40,
+                    y: this.config.floorHeight * 40
                 },
                 position: {
-                    x: -(this.config.floor_width * 10),
-                    y: -(this.config.floor_height * 10)
+                    x: -(this.config.floorWidth * 10),
+                    y: -(this.config.floorHeight * 10)
                 },
                 texture: 'gras.jpg',
-                repeat: this.config.floor_width * 20
+                repeat: this.config.floorWidth * 20
             }
         ];
 
@@ -82,7 +82,7 @@ export class Environment {
         this.group = new THREE.Object3D();
 
         for(var i = this.lines.length; i >= 0; --i) {
-            var geometry = new THREE.PlaneGeometry(this.config.floor_width, 0.3, 0);
+            var geometry = new THREE.PlaneGeometry(this.config.floorWidth, 0.3, 0);
             var material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.7 });
             var mesh = new THREE.Mesh(geometry, material);
 
@@ -90,7 +90,7 @@ export class Environment {
             mesh.receiveShadow = true;
 
             mesh.rotation = { x: - Math.PI / 2, y: 0, z: 0 };
-            mesh.position = { x: this.config.floor_width / 2, y: 0.01, z: this.lines[i] };
+            mesh.position = { x: this.config.floorWidth / 2, y: 0.01, z: this.lines[i] };
 
             this.group.add(mesh);
         }
