@@ -884,6 +884,8 @@ var Renderer = exports.Renderer = (function () {
 },{}],8:[function(require,module,exports){
 "use strict";
 
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
@@ -905,6 +907,38 @@ var Snail = exports.Snail = (function (_Model) {
     }
 
     _inherits(Snail, _Model);
+
+    _createClass(Snail, {
+        getSlime: {
+            value: function getSlime() {
+                var slime;
+                if (this.slimeCounter % 20 == 0) {
+
+                    var slimeTexture = THREE.ImageUtils.loadTexture("img/slime.png");
+                    // set texture properties, repeat
+                    slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
+                    slimeTexture.repeat.set(1, 1);
+                    var slimeTextureBegin = THREE.ImageUtils.loadTexture("img/slimeBegin.png");
+                    // set texture properties, repeat
+                    slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
+                    slimeTextureBegin.repeat.set(1, 1);
+
+                    if (this.slimeCounter != 0) {
+                        slime = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2, 1, 1), new THREE.MeshLambertMaterial({ map: slimeTexture, transparent: true, alphaTest: 0.4 }));
+                    } else {
+                        slime = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2, 1, 1), new THREE.MeshLambertMaterial({ map: slimeTextureBegin, transparent: true, alphaTest: 0.4 }));
+                    }
+
+                    slime.doubleSided = true;
+                    slime.receiveShadow = true;
+                    slime.position.set(this.model.position.x, this.model.position.y + 0.03, this.model.position.z + 0.8);
+                    slime.rotation.set(-(90 * Math.PI / 180), 0, 0);
+                }
+                this.slimeCounter++;
+                return slime;
+            }
+        }
+    });
 
     return Snail;
 })(Model);
@@ -990,38 +1024,6 @@ var Game = exports.Game = (function () {
                 this.renderer.updateInGameCamera(mid);
             }
         },
-        addSlime: {
-            //draws slime for each snail
-
-            value: function addSlime(snailIndex) {
-                if (this.playerSnails.snails[snailIndex].slimeCounter % 20 == 0) {
-                    var slime;
-
-                    var slimeTexture = THREE.ImageUtils.loadTexture("img/slime.png");
-                    // set texture properties, repeat
-                    slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-                    slimeTexture.repeat.set(1, 1);
-                    var slimeTextureBegin = THREE.ImageUtils.loadTexture("img/slimeBegin.png");
-                    // set texture properties, repeat
-                    slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-                    slimeTextureBegin.repeat.set(1, 1);
-
-                    if (this.playerSnails.snails[snailIndex].slimeCounter != 0) {
-                        slime = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2, 1, 1), new THREE.MeshLambertMaterial({ map: slimeTexture, transparent: true, alphaTest: 0.4 }));
-                    } else {
-                        slime = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2, 1, 1), new THREE.MeshLambertMaterial({ map: slimeTextureBegin, transparent: true, alphaTest: 0.4 }));
-                    }
-
-                    slime.doubleSided = true;
-                    slime.receiveShadow = true;
-                    slime.position.set(this.playerSnails.snails[snailIndex].model.position.x, this.playerSnails.snails[snailIndex].model.position.y + 0.03, this.playerSnails.snails[snailIndex].model.position.z + 0.8);
-                    slime.rotation.set(-(90 * Math.PI / 180), 0, 0);
-                    this.scene.add(slime);
-                }
-
-                this.playerSnails.snails[snailIndex].slimeCounter++;
-            }
-        },
         modelMove: {
 
             //moves models on the scene
@@ -1030,9 +1032,8 @@ var Game = exports.Game = (function () {
             value: function modelMove(snailIndex) {
                 // set new position of snail
                 // into negativ z-axis
-                var snailSpeed = 0.9;
-                this.playerSnails.snails[snailIndex].model.position.z -= snailSpeed;
-                this.addSlime(snailIndex);
+                this.playerSnails.snails[snailIndex].model.position.z -= this.config.snailSpeed;
+                this.scene.add(this.playerSnails.snails[snailIndex].getSlime());
                 // if devCam is not enabled, set camera to new position
                 this.setCameraInGame();
 

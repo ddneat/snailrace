@@ -51,50 +51,14 @@ export class Game {
         var mid = (position.max + position.min) / 2;
         this.renderer.updateInGameCamera(mid);
     }
-    //draws slime for each snail
-    addSlime(snailIndex){
-        if(this.playerSnails.snails[snailIndex].slimeCounter%20 == 0){
-            var slime;
-
-            var slimeTexture = THREE.ImageUtils.loadTexture('img/slime.png');
-            // set texture properties, repeat
-            slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-            slimeTexture.repeat.set(1, 1);
-            var slimeTextureBegin = THREE.ImageUtils.loadTexture('img/slimeBegin.png');
-            // set texture properties, repeat
-            slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-            slimeTextureBegin.repeat.set(1, 1);
-
-            if(this.playerSnails.snails[snailIndex].slimeCounter != 0){
-                slime = new THREE.Mesh(
-                    new THREE.PlaneGeometry(0.9, 2, 1, 1),
-                    new THREE.MeshLambertMaterial({map: slimeTexture, transparent:true, alphaTest: 0.4})
-                );
-            }else{
-                slime = new THREE.Mesh(
-                    new THREE.PlaneGeometry(0.9, 2, 1, 1),
-                    new THREE.MeshLambertMaterial({map: slimeTextureBegin, transparent:true, alphaTest: 0.4})
-                );
-            }
-
-            slime.doubleSided = true;
-            slime.receiveShadow = true;
-            slime.position.set(this.playerSnails.snails[snailIndex].model.position.x, this.playerSnails.snails[snailIndex].model.position.y+0.03, this.playerSnails.snails[snailIndex].model.position.z+0.8);
-            slime.rotation.set(-(90*Math.PI/180), 0, 0);
-            this.scene.add(slime);
-        }
-
-        this.playerSnails.snails[snailIndex].slimeCounter++;
-    }
 
     //moves models on the scene
     // todo: disable until countdown is over
     modelMove(snailIndex){
         // set new position of snail
         // into negativ z-axis
-        var snailSpeed = 0.9;
-        this.playerSnails.snails[snailIndex].model.position.z -= snailSpeed;
-        this.addSlime(snailIndex);
+        this.playerSnails.snails[snailIndex].model.position.z -= this.config.snailSpeed;
+        this.scene.add(this.playerSnails.snails[snailIndex].getSlime());
         // if devCam is not enabled, set camera to new position
         this.setCameraInGame();
 
