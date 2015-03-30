@@ -19,7 +19,7 @@ export class Highscore {
      * @param callback {function} optional
      */
     saveItem(name, time, callback) {
-        var data = JSON.parse(this.storage.getItem('highscore'));
+        var data = JSON.parse(this.storage.getItem('highscore')) || [];
         data.push({name: name, time: time});
         this.storage.setItem('highscore', JSON.stringify(data));
         callback && callback();
@@ -31,7 +31,7 @@ export class Highscore {
      */
     getJSON() {
         var storageContent = JSON.parse(this.storage.getItem('highscore'));
-        if(!storageContent.length) return [];
+        if(!storageContent) return [];
 
         return storageContent.sort(function(a, b){
             return a.time < b.time ? -1 : 1;
