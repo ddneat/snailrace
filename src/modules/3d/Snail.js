@@ -21,16 +21,11 @@ export class Snail extends Model {
     getSlime(){
         var slime;
         if(this.slimeCounter%20 == 0){
+            var texturePath = this.slimeCounter != 0 ? 'img/slime.png' : 'img/slimeBegin.png';
+            var texture = THREE.ImageUtils.loadTexture(texturePath);
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 1);
 
-            var slimeTexture = THREE.ImageUtils.loadTexture('img/slime.png');
-            slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-            slimeTexture.repeat.set(1, 1);
-
-            var slimeTextureBegin = THREE.ImageUtils.loadTexture('img/slimeBegin.png');
-            slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-            slimeTextureBegin.repeat.set(1, 1);
-
-            var texture = this.slimeCounter != 0 ? slimeTexture : slimeTextureBegin;
             slime = new THREE.Mesh(
                 new THREE.PlaneGeometry(0.9, 2, 1, 1),
                 new THREE.MeshLambertMaterial({map: texture, transparent:true, alphaTest: 0.4})
