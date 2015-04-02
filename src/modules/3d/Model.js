@@ -1,4 +1,13 @@
 export class Model {
+    /**
+     * constructor
+     * e.g.: new Model()
+     *
+     * @param modelArray {Array}
+     * @param modelName {String}
+     * @param config {Object}
+     * @param loadedCallback {function}
+     */
     constructor(modelArray, modelName, config, loadedCallback){
         this.modelArray = modelArray;
         this.modelName = modelName;
@@ -9,7 +18,10 @@ export class Model {
 
         this.loadModel();
     }
-
+    /**
+     * Model.loadModel
+     * e.g.: Model.loadModel();
+     */
     loadModel() {
         var newModel;
         var _this = this;

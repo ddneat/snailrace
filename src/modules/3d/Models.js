@@ -2,6 +2,13 @@ import { Model } from './Model.js';
 import { Snail } from './Snail.js';
 
 export class Models {
+    /**
+     * constructor
+     * e.g.: new Models()
+     *
+     * @param options {Object}
+     * @param config {Object}
+     */
     constructor(options, config) {
         this.modelsToLoad = 5;
         this.snailModels = [];
@@ -20,19 +27,28 @@ export class Models {
             this.loadComplete();
         }).bind(this));
     }
-
+    /**
+     * Models.setPlayerSnails
+     * e.g.: Models.setPlayerSnails();
+     */
     setPlayerSnails(playerCount){
         for(var i=0; i < playerCount; i++){
             this.setSingleSnail(i);
         }
     };
-
+    /**
+     * Models.setSingleSnail
+     * e.g.: Models.setSingleSnail();
+     */
     setSingleSnail(playerNumber){
         this.snailModels[playerNumber].model.position.x = this.config.trackWidth / 2 + this.config.trackWidth * playerNumber;
         this.playerSnails.snails.push(this.snailModels[playerNumber]);
         this.scene.add(this.snailModels[playerNumber].model);
     };
-
+    /**
+     * Models.loadComplete
+     * e.g.: Models.loadComplete();
+     */
     loadComplete(){
         this.modelsToLoad--;
         if(this.modelsToLoad <= 0){ // game ready to start, remove loading bar

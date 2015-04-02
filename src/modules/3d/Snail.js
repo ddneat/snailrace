@@ -1,12 +1,23 @@
 import { Model } from './Model.js';
 
 export class Snail extends Model {
+    /**
+     * constructor
+     * e.g.: new Snail()
+     *
+     * @param modelArray {Array}
+     * @param modelName {String}
+     * @param config {Object}
+     * @param loadedCallback {Function}
+     */
     constructor(modelArray, modelName, config, loadedCallback){
         super(modelArray, modelName, config, loadedCallback);
         this.slimeCounter = 0
     }
-
-
+    /**
+     * Snail.getSlime
+     * e.g.: Snail.getSlime();
+     */
     getSlime(){
         var slime;
         if(this.slimeCounter%20 == 0){
@@ -25,7 +36,7 @@ export class Snail extends Model {
                     new THREE.PlaneGeometry(0.9, 2, 1, 1),
                     new THREE.MeshLambertMaterial({map: slimeTexture, transparent:true, alphaTest: 0.4})
                 );
-            }else{
+            } else {
                 slime = new THREE.Mesh(
                     new THREE.PlaneGeometry(0.9, 2, 1, 1),
                     new THREE.MeshLambertMaterial({map: slimeTextureBegin, transparent:true, alphaTest: 0.4})
