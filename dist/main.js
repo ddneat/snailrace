@@ -989,6 +989,18 @@ var Snail = exports.Snail = (function (_Model) {
                 this.model.position.z -= this.config.snailSpeed;
             }
         },
+        getModelCenter: {
+            /**
+             * Snail.getModelCenter
+             * e.g.: Snail.getModelCenter();
+             *
+             * @return {Number}
+             */
+
+            value: function getModelCenter() {
+                return Math.abs(this.model.position.z - this.config.modelSize / 2);
+            }
+        },
         getSlime: {
             /**
              * Snail.getSlime
@@ -1135,7 +1147,7 @@ var Game = exports.Game = (function () {
                 snail.move();
 
                 this.setCameraInGame();
-                this.checkGameOver(snailIndex);
+                this.isGameOver && this.checkGameOver(snailIndex);
             }
         },
         checkGameOver: {
@@ -1145,7 +1157,7 @@ var Game = exports.Game = (function () {
              */
 
             value: function checkGameOver(snailIndex) {
-                if (this.isSnailOverFinish(snailIndex) && !this.isGameOver) this.setGameOver(snailIndex);
+                this.isSnailOverFinish(snailIndex) && this.setGameOver(snailIndex);
             }
         },
         isSnailOverFinish: {
@@ -1155,7 +1167,7 @@ var Game = exports.Game = (function () {
              */
 
             value: function isSnailOverFinish(snailIndex) {
-                return Math.abs(this.playerSnails.snails[snailIndex].model.position.z - this.config.modelSize / 2) >= this.config.finPosZ;
+                return this.playerSnails.snails[snailIndex].getModelCenter() >= this.config.finPosZ;
             }
         },
         addCounter: {
