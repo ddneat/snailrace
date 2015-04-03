@@ -12,7 +12,15 @@ export class Snail extends Model {
      */
     constructor(modelArray, modelName, config, loadedCallback){
         super(modelArray, modelName, config, loadedCallback);
-        this.slimeCounter = 0
+        this.slimeCounter = 0;
+        this.config = config;
+    }
+    /**
+     * Snail.move
+     * e.g.: Snail.move();
+     */
+    move() {
+        this.model.position.z -= this.config.snailSpeed;
     }
     /**
      * Snail.getSlime
