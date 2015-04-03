@@ -17,11 +17,24 @@ export class Models {
         this.scene = options.scene;
         this.config = config;
 
+        this.loadSnailModels();
+        this.loadFlagModel();
+    }
+    /**
+     * Models.loadSnailModels
+     * e.g.: Models.loadSnailModels();
+     */
+    loadSnailModels() {
         new Snail(this.snailModels, 'snailmodelGreen', {}, this.loadComplete.bind(this));
         new Snail(this.snailModels, 'snailmodelBlue', {}, this.loadComplete.bind(this));
         new Snail(this.snailModels, 'snailmodelRed', {}, this.loadComplete.bind(this));
         new Snail(this.snailModels, 'snailmodelYellow', {}, this.loadComplete.bind(this));
-
+    }
+    /**
+     * Models.loadSnailModels
+     * e.g.: Models.loadSnailModels();
+     */
+    loadFlagModel() {
         new Model(this.sceneModels, 'flag', {scale: {x: 0.1, y: 0.1, z: 0.1}, position: { x:5, y:0, z:-20}}, (function(object){
             this.scene.add(object.model);
             this.loadComplete();
