@@ -69,6 +69,8 @@ export class Renderer {
     /**
      * Renderer.addMultipleViewports
      * e.g.: Renderer.addMultipleViewports();
+     *
+     * TODO: enable this feature again
      */
     addMultipleViewports() {
         var _this = this;
