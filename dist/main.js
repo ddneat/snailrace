@@ -549,6 +549,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var Model = exports.Model = (function () {
+    /**
+     * constructor
+     * e.g.: new Model()
+     *
+     * @param modelArray {Array}
+     * @param modelName {String}
+     * @param config {Object}
+     * @param loadedCallback {function}
+     */
+
     function Model(modelArray, modelName, config, loadedCallback) {
         _classCallCheck(this, Model);
 
@@ -564,6 +574,11 @@ var Model = exports.Model = (function () {
 
     _createClass(Model, {
         loadModel: {
+            /**
+             * Model.loadModel
+             * e.g.: Model.loadModel();
+             */
+
             value: function loadModel() {
                 var newModel;
                 var _this = this;
@@ -610,6 +625,14 @@ var Model = require("./Model.js").Model;
 var Snail = require("./Snail.js").Snail;
 
 var Models = exports.Models = (function () {
+    /**
+     * constructor
+     * e.g.: new Models()
+     *
+     * @param options {Object}
+     * @param config {Object}
+     */
+
     function Models(options, config) {
         _classCallCheck(this, Models);
 
@@ -620,19 +643,43 @@ var Models = exports.Models = (function () {
         this.scene = options.scene;
         this.config = config;
 
-        new Snail(this.snailModels, "snailmodelGreen", {}, this.loadComplete.bind(this));
-        new Snail(this.snailModels, "snailmodelBlue", {}, this.loadComplete.bind(this));
-        new Snail(this.snailModels, "snailmodelRed", {}, this.loadComplete.bind(this));
-        new Snail(this.snailModels, "snailmodelYellow", {}, this.loadComplete.bind(this));
-
-        new Model(this.sceneModels, "flag", { scale: { x: 0.1, y: 0.1, z: 0.1 }, position: { x: 5, y: 0, z: -20 } }, (function (object) {
-            this.scene.add(object.model);
-            this.loadComplete();
-        }).bind(this));
+        this.loadSnailModels();
+        this.loadFlagModel();
     }
 
     _createClass(Models, {
+        loadSnailModels: {
+            /**
+             * Models.loadSnailModels
+             * e.g.: Models.loadSnailModels();
+             */
+
+            value: function loadSnailModels() {
+                new Snail(this.snailModels, "snailmodelGreen", this.config, this.loadComplete.bind(this));
+                new Snail(this.snailModels, "snailmodelBlue", this.config, this.loadComplete.bind(this));
+                new Snail(this.snailModels, "snailmodelRed", this.config, this.loadComplete.bind(this));
+                new Snail(this.snailModels, "snailmodelYellow", this.config, this.loadComplete.bind(this));
+            }
+        },
+        loadFlagModel: {
+            /**
+             * Models.loadFlagModel
+             * e.g.: Models.loadFlagModel();
+             */
+
+            value: function loadFlagModel() {
+                new Model(this.sceneModels, "flag", { scale: { x: 0.1, y: 0.1, z: 0.1 }, position: { x: 5, y: 0, z: -20 } }, (function (object) {
+                    this.scene.add(object.model);
+                    this.loadComplete();
+                }).bind(this));
+            }
+        },
         setPlayerSnails: {
+            /**
+             * Models.setPlayerSnails
+             * e.g.: Models.setPlayerSnails();
+             */
+
             value: function setPlayerSnails(playerCount) {
                 for (var i = 0; i < playerCount; i++) {
                     this.setSingleSnail(i);
@@ -640,6 +687,11 @@ var Models = exports.Models = (function () {
             }
         },
         setSingleSnail: {
+            /**
+             * Models.setSingleSnail
+             * e.g.: Models.setSingleSnail();
+             */
+
             value: function setSingleSnail(playerNumber) {
                 this.snailModels[playerNumber].model.position.x = this.config.trackWidth / 2 + this.config.trackWidth * playerNumber;
                 this.playerSnails.snails.push(this.snailModels[playerNumber]);
@@ -647,6 +699,11 @@ var Models = exports.Models = (function () {
             }
         },
         loadComplete: {
+            /**
+             * Models.loadComplete
+             * e.g.: Models.loadComplete();
+             */
+
             value: function loadComplete() {
                 this.modelsToLoad--;
                 if (this.modelsToLoad <= 0) {
@@ -762,6 +819,8 @@ var Renderer = exports.Renderer = (function () {
             /**
              * Renderer.addMultipleViewports
              * e.g.: Renderer.addMultipleViewports();
+             *
+             * TODO: enable this feature again
              */
 
             value: function addMultipleViewports() {
@@ -899,35 +958,52 @@ Object.defineProperty(exports, "__esModule", {
 var Model = require("./Model.js").Model;
 
 var Snail = exports.Snail = (function (_Model) {
+    /**
+     * constructor
+     * e.g.: new Snail()
+     *
+     * @param modelArray {Array}
+     * @param modelName {String}
+     * @param config {Object}
+     * @param loadedCallback {Function}
+     */
+
     function Snail(modelArray, modelName, config, loadedCallback) {
         _classCallCheck(this, Snail);
 
         _get(Object.getPrototypeOf(Snail.prototype), "constructor", this).call(this, modelArray, modelName, config, loadedCallback);
         this.slimeCounter = 0;
+        this.config = config;
     }
 
     _inherits(Snail, _Model);
 
     _createClass(Snail, {
+        move: {
+            /**
+             * Snail.move
+             * e.g.: Snail.move();
+             */
+
+            value: function move() {
+                this.model.position.z -= this.config.snailSpeed;
+            }
+        },
         getSlime: {
+            /**
+             * Snail.getSlime
+             * e.g.: Snail.getSlime();
+             */
+
             value: function getSlime() {
                 var slime;
                 if (this.slimeCounter % 20 == 0) {
+                    var texturePath = this.slimeCounter != 0 ? "img/slime.png" : "img/slimeBegin.png";
+                    var texture = THREE.ImageUtils.loadTexture(texturePath);
+                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.set(1, 1);
 
-                    var slimeTexture = THREE.ImageUtils.loadTexture("img/slime.png");
-                    // set texture properties, repeat
-                    slimeTexture.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-                    slimeTexture.repeat.set(1, 1);
-                    var slimeTextureBegin = THREE.ImageUtils.loadTexture("img/slimeBegin.png");
-                    // set texture properties, repeat
-                    slimeTextureBegin.wrapS = slimeTexture.wrapT = THREE.RepeatWrapping;
-                    slimeTextureBegin.repeat.set(1, 1);
-
-                    if (this.slimeCounter != 0) {
-                        slime = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2, 1, 1), new THREE.MeshLambertMaterial({ map: slimeTexture, transparent: true, alphaTest: 0.4 }));
-                    } else {
-                        slime = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2, 1, 1), new THREE.MeshLambertMaterial({ map: slimeTextureBegin, transparent: true, alphaTest: 0.4 }));
-                    }
+                    slime = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2, 1, 1), new THREE.MeshLambertMaterial({ map: texture, transparent: true, alphaTest: 0.4 }));
 
                     slime.doubleSided = true;
                     slime.receiveShadow = true;
@@ -965,13 +1041,18 @@ var Confetti = require("./3d/Confetti.js").Confetti;
 var Renderer = require("./3d/Renderer.js").Renderer;
 
 var Game = exports.Game = (function () {
+    /**
+     * constructor
+     * e.g.: new Game()
+     */
+
     function Game() {
         _classCallCheck(this, Game);
 
         this.scene = new THREE.Scene();
         this.isGameOver = false;
         this.winnerTrack = 0;
-        this.startTime;
+        this.startTime = null;
 
         this.config = {
             trackWidth: 10 / 4,
@@ -979,6 +1060,7 @@ var Game = exports.Game = (function () {
             floorHeight: 30,
             snailSpeed: 0.1,
             finPosZ: 23,
+            modelSize: 2.6,
             playerCount: 2
         };
 
@@ -992,6 +1074,12 @@ var Game = exports.Game = (function () {
 
     _createClass(Game, {
         getEndTime: {
+            /**
+             * Game.getEndTime
+             *
+             * @return {Number}
+             */
+
             value: function getEndTime() {
                 var endTime = (new Date().getTime() - this.startTime) / 1000;
                 endTime.toFixed(3);
@@ -999,6 +1087,12 @@ var Game = exports.Game = (function () {
             }
         },
         getFirstAndLastSnailPositionZ: {
+            /**
+             * Game.getFirstAndLastSnailPositionZ
+             *
+             * @return {Object}
+             */
+
             value: function getFirstAndLastSnailPositionZ() {
                 var min = 10,
                     max = 0,
@@ -1018,6 +1112,10 @@ var Game = exports.Game = (function () {
             }
         },
         setCameraInGame: {
+            /**
+             * Game.setCameraInGame
+             */
+
             value: function setCameraInGame() {
                 var position = this.getFirstAndLastSnailPositionZ();
                 var mid = (position.max + position.min) / 2;
@@ -1025,28 +1123,45 @@ var Game = exports.Game = (function () {
             }
         },
         modelMove: {
-
-            //moves models on the scene
-            // todo: disable until countdown is over
+            /**
+             * Game.modelMove
+             */
 
             value: function modelMove(snailIndex) {
-                // set new position of snail
-                // into negativ z-axis
-                this.playerSnails.snails[snailIndex].model.position.z -= this.config.snailSpeed;
-                this.scene.add(this.playerSnails.snails[snailIndex].getSlime());
-                // if devCam is not enabled, set camera to new position
-                this.setCameraInGame();
+                if (!this.startTime) {
+                    return;
+                }var snail = this.playerSnails.snails[snailIndex];
+                this.scene.add(snail.getSlime());
+                snail.move();
 
-                // check if user reached finish
-                var halfmodel = 1.3; // model-pivot is center, with halfmodel -> head
-                var finPosZ = 23;
-                if (Math.abs(this.playerSnails.snails[snailIndex].model.position.z - halfmodel) >= finPosZ && !this.isGameOver) this.setGameOver(snailIndex);
+                this.setCameraInGame();
+                this.checkGameOver(snailIndex);
+            }
+        },
+        checkGameOver: {
+            /**
+             * Game.checkGameOver
+             * e.g.: Game.checkGameOver();
+             */
+
+            value: function checkGameOver(snailIndex) {
+                if (this.isSnailOverFinish(snailIndex) && !this.isGameOver) this.setGameOver(snailIndex);
+            }
+        },
+        isSnailOverFinish: {
+            /**
+             * Game.isSnailOverFinish
+             * e.g.: Game.isSnailOverFinish();
+             */
+
+            value: function isSnailOverFinish(snailIndex) {
+                return Math.abs(this.playerSnails.snails[snailIndex].model.position.z - this.config.modelSize / 2) >= this.config.finPosZ;
             }
         },
         addCounter: {
             /**
-             * Renderer.addCounter
-             * e.g.: Renderer.addCounter();
+             * Game.addCounter
+             * e.g.: Game.addCounter();
              *
              * @param callback {function) optional
              */
@@ -1059,8 +1174,14 @@ var Game = exports.Game = (function () {
             }
         },
         startGame: {
+            /**
+             * Game.startGame
+             * e.g.: Game.startGame();
+             */
+
             value: function startGame(gameOverCallback) {
                 this.models.setPlayerSnails(this.playerCount);
+                this.setCameraInGame();
                 this.addCounter();
                 this.renderer.render();
 
@@ -1068,6 +1189,11 @@ var Game = exports.Game = (function () {
             }
         },
         setGameOver: {
+            /**
+             * Game.setGameOver
+             * e.g.: Game.setGameOver();
+             */
+
             value: function setGameOver(winID) {
                 this.isGameOver = true;
                 this.winnerTrack = winID + 1;
@@ -1076,7 +1202,6 @@ var Game = exports.Game = (function () {
                 this.confetti = new Confetti(this.scene, this.config, this.winnerTrack);
 
                 this.endTime = this.getEndTime();
-                console.log(this.endTime);
                 this.gameOverCallback(this.endTime);
             }
         }

@@ -13,7 +13,7 @@ export class Game {
         this.scene = new THREE.Scene();
         this.isGameOver = false;
         this.winnerTrack = 0;
-        this.startTime;
+        this.startTime = null;
 
         this.config = {
             trackWidth: 10 / 4,
@@ -21,6 +21,7 @@ export class Game {
             floorHeight: 30,
             snailSpeed: 0.1,
             finPosZ: 23,
+            modelSize: 2.6,
             playerCount: 2
         };
 
@@ -66,18 +67,31 @@ export class Game {
     }
     /**
      * Game.modelMove
-     *
-     * todo: disable until countdown is over
      */
     modelMove(snailIndex){
-        this.playerSnails.snails[snailIndex].model.position.z -= this.config.snailSpeed;
-        this.scene.add(this.playerSnails.snails[snailIndex].getSlime());
-        this.setCameraInGame();
+        if(!this.startTime) return;
 
-        var halfmodel = 1.3;
-        var finPosZ = 23;
-        if(Math.abs(this.playerSnails.snails[snailIndex].model.position.z - halfmodel) >= finPosZ && !this.isGameOver)
+        var snail = this.playerSnails.snails[snailIndex];
+        this.scene.add(snail.getSlime());
+        snail.move();
+
+        this.setCameraInGame();
+        this.checkGameOver(snailIndex);
+    }
+    /**
+     * Game.checkGameOver
+     * e.g.: Game.checkGameOver();
+     */
+    checkGameOver(snailIndex) {
+        if(this.isSnailOverFinish(snailIndex) && !this.isGameOver)
             this.setGameOver(snailIndex);
+    }
+    /**
+     * Game.isSnailOverFinish
+     * e.g.: Game.isSnailOverFinish();
+     */
+    isSnailOverFinish(snailIndex) {
+        return Math.abs(this.playerSnails.snails[snailIndex].model.position.z - this.config.modelSize / 2) >= this.config.finPosZ;
     }
     /**
      * Game.addCounter
@@ -97,6 +111,7 @@ export class Game {
      */
     startGame(gameOverCallback){
         this.models.setPlayerSnails(this.playerCount);
+        this.setCameraInGame();
         this.addCounter();
         this.renderer.render();
 
