@@ -140,7 +140,7 @@ export class Renderer {
         if(this.game.isGameOver){
             this.game.confetti.animate();
 
-            //TODO: refactor winnerSnail and multiple views
+            //TODO: enable multiple views
             //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
             this.webglRenderer.render(this.scene, this.camera);
             //viewports

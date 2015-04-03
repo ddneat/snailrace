@@ -192,33 +192,76 @@ var Confetti = exports.Confetti = (function () {
              */
 
             value: function init() {
-                var materials = [];
-                var positionX = this.config.trackWidth * (this.track - 1) + 1.3;
-
                 for (var i = 0; i < 15; i++) {
-                    var geometry = new THREE.Geometry();
-
-                    for (var j = 0; j < 1200; j++) {
-                        var vertex = new THREE.Vector3();
-                        vertex.x = Math.random() * 2 - 1;
-                        vertex.y = Math.random() * 15 - 1;
-                        vertex.z = Math.random() * 30 - 1;
-                        vertex.velocity = new THREE.Vector3(0, -1, 0);
-                        geometry.vertices.push(vertex);
-                    }
-
-                    var color = "#000000".replace(/0/g, function () {
-                        return (~ ~(Math.random() * 16)).toString(16);
-                    });
-                    materials[i] = new THREE.ParticleBasicMaterial({ size: 0.1 });
-                    materials[i].color = new THREE.Color(color);
-
-                    this.particles[i] = new THREE.ParticleSystem(geometry, materials[i]);
-                    this.particles[i].position.set(positionX, 1, -26);
+                    this.particles[i] = new THREE.ParticleSystem(this.getParticleGeometry(), this.getParticleMaterial());
+                    this.particles[i].position.set(this.getTrackPositionX(), 1, -26);
                     this.particles[i].sortPosition = true;
 
                     this.scene.add(this.particles[i]);
                 }
+            }
+        },
+        getTrackPositionX: {
+            /**
+             * Confetti.getTrackPositionX
+             * e.g.: Confetti.getTrackPositionX();
+             *
+             * @return {Number}
+             */
+
+            value: function getTrackPositionX() {
+                return this.config.trackWidth * (this.track - 1) + 1.3;
+            }
+        },
+        getParticleGeometry: {
+            /**
+             * Confetti.getParticleGeometry
+             * e.g.: Confetti.getParticleGeometry();
+             *
+             * @return {Object}
+             */
+
+            value: function getParticleGeometry() {
+                var geometry = new THREE.Geometry();
+
+                for (var j = 0; j < 1200; j++) {
+                    var vertex = new THREE.Vector3();
+                    vertex.x = Math.random() * 2 - 1;
+                    vertex.y = Math.random() * 15 - 1;
+                    vertex.z = Math.random() * 30 - 1;
+                    vertex.velocity = new THREE.Vector3(0, -1, 0);
+                    geometry.vertices.push(vertex);
+                }
+
+                return geometry;
+            }
+        },
+        getParticleMaterial: {
+            /**
+             * Confetti.getParticleMaterial
+             * e.g.: Confetti.getParticleMaterial();
+             *
+             * @return {Object}
+             */
+
+            value: function getParticleMaterial() {
+                var material = new THREE.ParticleBasicMaterial({ size: 0.1 });
+                material.color = new THREE.Color(this.getRandomColor());
+                return material;
+            }
+        },
+        getRandomColor: {
+            /**
+             * Confetti.getRandomColor
+             * e.g.: Confetti.getRandomColor();
+             *
+             * return {String} #000000
+             */
+
+            value: function getRandomColor() {
+                return "#000000".replace(/0/g, function () {
+                    return (~ ~(Math.random() * 16)).toString(16);
+                });
             }
         },
         animate: {
@@ -666,7 +709,10 @@ var Models = exports.Models = (function () {
              */
 
             value: function loadFlagModel() {
-                new Model(this.sceneModels, "flag", { scale: { x: 0.1, y: 0.1, z: 0.1 }, position: { x: 5, y: 0, z: -20 } }, (function (object) {
+                var scale = { x: 0.1, y: 0.1, z: 0.1 };
+                var position = { x: 5, y: 0, z: -(this.config.finPosZ - 0.5) };
+
+                new Model(this.sceneModels, "flag", { scale: scale, position: position }, (function (object) {
                     this.scene.add(object.model);
                     this.loadComplete();
                 }).bind(this));
@@ -705,9 +751,7 @@ var Models = exports.Models = (function () {
             value: function loadComplete() {
                 this.modelsToLoad--;
                 if (this.modelsToLoad <= 0) {
-                    // game ready to start, remove loading bar
                     document.getElementById("loadingBar").style.display = "none";
-                    // enable start game
                     $("#startgame").removeAttr("disabled").removeClass("btn-disabled");
                 }
             }
@@ -899,7 +943,7 @@ var Renderer = exports.Renderer = (function () {
                 if (this.game.isGameOver) {
                     this.game.confetti.animate();
 
-                    //TODO: refactor winnerSnail and multiple views
+                    //TODO: enable multiple views
                     //cameraFinish.position.set(1, 4, this.playerSnails.snails[winID].position.z - 8);
                     this.webglRenderer.render(this.scene, this.camera);
                     //viewports
@@ -1202,7 +1246,7 @@ var Game = exports.Game = (function () {
                 snail.move();
 
                 this.setCameraInGame();
-                this.isGameOver && this.checkGameOver(snailIndex);
+                !this.isGameOver && this.checkGameOver(snailIndex);
             }
         },
         checkGameOver: {

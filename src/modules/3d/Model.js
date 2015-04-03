@@ -46,6 +46,4 @@ export class Model {
         }, false);
         loader.load("models/" + this.modelName + ".obj", "models/" + this.modelName + ".mtl");
     }
-
-
 }

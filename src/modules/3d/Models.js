@@ -35,7 +35,10 @@ export class Models {
      * e.g.: Models.loadFlagModel();
      */
     loadFlagModel() {
-        new Model(this.sceneModels, 'flag', {scale: {x: 0.1, y: 0.1, z: 0.1}, position: { x:5, y:0, z:-20}}, (function(object){
+        var scale = {x: 0.1, y: 0.1, z: 0.1};
+        var position = { x:5, y:0, z:-(this.config.finPosZ - 0.5)};
+
+        new Model(this.sceneModels, 'flag', {scale: scale, position: position}, (function(object){
             this.scene.add(object.model);
             this.loadComplete();
         }).bind(this));
@@ -48,7 +51,7 @@ export class Models {
         for(var i=0; i < playerCount; i++){
             this.setSingleSnail(i);
         }
-    };
+    }
     /**
      * Models.setSingleSnail
      * e.g.: Models.setSingleSnail();
@@ -57,16 +60,15 @@ export class Models {
         this.snailModels[playerNumber].model.position.x = this.config.trackWidth / 2 + this.config.trackWidth * playerNumber;
         this.playerSnails.snails.push(this.snailModels[playerNumber]);
         this.scene.add(this.snailModels[playerNumber].model);
-    };
+    }
     /**
      * Models.loadComplete
      * e.g.: Models.loadComplete();
      */
     loadComplete(){
         this.modelsToLoad--;
-        if(this.modelsToLoad <= 0){ // game ready to start, remove loading bar
+        if(this.modelsToLoad <= 0){
             document.getElementById("loadingBar").style.display = "none";
-            // enable start game
             $("#startgame").removeAttr("disabled").removeClass('btn-disabled');
         }
     }
