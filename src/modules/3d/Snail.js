@@ -34,13 +34,42 @@ export class Snail extends Model {
     /**
      * Snail.getTexturePath
      * e.g.: Snail.getTexturePath();
+     *
+     * @return {String}
      */
     getTexturePath() {
         return this.slimeCounter != 0 ? 'img/slime.png' : 'img/slimeBegin.png';
     }
     /**
+     * Snail.getTexturePath
+     * e.g.: Snail.getTexturePath();
+     *
+     * @return {Object}
+     */
+    getSlimeTexture() {
+        var texture = THREE.ImageUtils.loadTexture(this.getTexturePath());
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+
+        return texture;
+    }
+    /**
+     * Snail.getSlimeMesh
+     * e.g.: Snail.getSlimeMesh();
+     *
+     * @return {Object}
+     */
+    getSlimeMesh() {
+        return new THREE.Mesh(
+            new THREE.PlaneGeometry(0.9, 2, 1, 1),
+            new THREE.MeshLambertMaterial({map: this.getSlimeTexture(), transparent:true, alphaTest: 0.4})
+        );
+    }
+    /**
      * Snail.isNewSlimeNeeded
      * e.g.: Snail.isNewSlimeNeeded();
+     *
+     * @return {Boolean}
      */
     isNewSlimeNeeded() {
         return this.slimeCounter % 20 == 0;
@@ -50,22 +79,16 @@ export class Snail extends Model {
      * e.g.: Snail.getSlime();
      */
     getSlime() {
-        var slime;
-        if(this.isNewSlimeNeeded()){
-            var texture = THREE.ImageUtils.loadTexture(this.getTexturePath());
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(1, 1);
-
-            slime = new THREE.Mesh(
-                new THREE.PlaneGeometry(0.9, 2, 1, 1),
-                new THREE.MeshLambertMaterial({map: texture, transparent:true, alphaTest: 0.4})
-            );
-
-            slime.doubleSided = true;
-            slime.receiveShadow = true;
-            slime.position.set(this.model.position.x, this.model.position.y+0.03, this.model.position.z+0.8);
-            slime.rotation.set(-(90*Math.PI/180), 0, 0);
+        if(!this.isNewSlimeNeeded()) {
+            this.slimeCounter++;
+            return;
         }
+
+        var slime = this.getSlimeMesh();
+        slime.receiveShadow = true;
+        slime.position.set(this.model.position.x, this.model.position.y + 0.03, this.model.position.z + 0.8);
+        slime.rotation.set(-(90 * Math.PI / 180), 0, 0);
+
         this.slimeCounter++;
         return slime;
     }
