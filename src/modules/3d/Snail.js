@@ -23,6 +23,15 @@ export class Snail extends Model {
         this.model.position.z -= this.config.snailSpeed;
     }
     /**
+     * Snail.getModelCenter
+     * e.g.: Snail.getModelCenter();
+     *
+     * @return {Number}
+     */
+    getModelCenter() {
+        return Math.abs(this.model.position.z - this.config.modelSize / 2);
+    }
+    /**
      * Snail.getSlime
      * e.g.: Snail.getSlime();
      */
