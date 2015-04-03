@@ -33,6 +33,14 @@ export class Game {
         this.environment = new Environment(this.scene, this.config);
     }
     /**
+     * Game.getSnailByIndex
+     *
+     * @return {Snail}
+     */
+    getSnailByIndex(index) {
+        return this.playerSnails.snails[index];
+    }
+    /**
      * Game.getEndTime
      *
      * @return {Number}
@@ -47,11 +55,10 @@ export class Game {
      *
      * @return {Object}
      */
-    getFirstAndLastSnailPositionZ(){
-        var min = 10, max = 0, element, z;
-        for(var i = 0; i < this.playerSnails.snails.length; i++){
-            element = this.playerSnails.snails[i].model;
-            z = Math.abs(element.position.z);
+    getFirstAndLastSnailPositionZ() {
+        var min = 10, max = 0, z;
+        for(var i = 0; i < this.playerSnails.snails.length; i++) {
+            z = Math.abs(this.getSnailByIndex(i).model.position.z);
             if(z < min){ min = z; }
             if(z > max){ max = z; }
         }
@@ -60,7 +67,7 @@ export class Game {
     /**
      * Game.setCameraInGame
      */
-    setCameraInGame(){
+    setCameraInGame() {
         var position = this.getFirstAndLastSnailPositionZ();
         var mid = (position.max + position.min) / 2;
         this.renderer.updateInGameCamera(mid);
@@ -68,10 +75,10 @@ export class Game {
     /**
      * Game.modelMove
      */
-    modelMove(snailIndex){
+    modelMove(snailIndex ){
         if(!this.startTime) return;
 
-        var snail = this.playerSnails.snails[snailIndex];
+        var snail = this.getSnailByIndex(snailIndex);
         this.scene.add(snail.getSlime());
         snail.move();
 
@@ -90,7 +97,7 @@ export class Game {
      * e.g.: Game.isSnailOverFinish();
      */
     isSnailOverFinish(snailIndex) {
-        return this.playerSnails.snails[snailIndex].getModelCenter() >= this.config.finPosZ;
+        return this.getSnailByIndex(snailIndex).getModelCenter() >= this.config.finPosZ;
     }
     /**
      * Game.addCounter
@@ -108,26 +115,31 @@ export class Game {
      * Game.startGame
      * e.g.: Game.startGame();
      */
-    startGame(gameOverCallback){
-        this.models.setPlayerSnails(this.playerCount);
+    startGame(gameOverCallback) {
+        this.gameOverCallback = gameOverCallback;
         this.setCameraInGame();
         this.addCounter();
+        this.models.setPlayerSnails(this.playerCount);
         this.renderer.render();
-
-        this.gameOverCallback = gameOverCallback;
     }
     /**
      * Game.setGameOver
      * e.g.: Game.setGameOver();
      */
-    setGameOver(winID){
+    setGameOver(winID) {
         this.isGameOver = true;
         this.winnerTrack = winID + 1;
+        this.endTime = this.getEndTime();
 
+        this.addWinnerEffects();
+        this.gameOverCallback(this.endTime);
+    }
+    /**
+     * Game.addWinnerEffects
+     * e.g.: Game.addWinnerEffects();
+     */
+    addWinnerEffects() {
         this.environment.addWinnerCaption(this.winnerTrack);
         this.confetti = new Confetti(this.scene, this.config, this.winnerTrack);
-
-        this.endTime = this.getEndTime();
-        this.gameOverCallback(this.endTime);
     }
 }
