@@ -6,6 +6,7 @@ export class Confetti {
      * Winner Confetti Animation
      *
      * @param scene {Object}
+     * @param config {Object}
      * @param track {Number} 1-4
      */
     constructor(scene, config, track) {
@@ -23,7 +24,7 @@ export class Confetti {
     init() {
         for (var i = 0; i < 15; i++) {
             this.particles[i] = new THREE.ParticleSystem(this.getParticleGeometry(), this.getParticleMaterial());
-            this.particles[i].position.set(this.getTrackPositionX(), 1, -26);
+            this.particles[i].position = { x: this.getTrackPositionX(), y: 1, z: -26 };
             this.particles[i].sortPosition = true;
 
             this.scene.add(this.particles[i]);
@@ -53,7 +54,7 @@ export class Confetti {
             vertex.y = Math.random() * 15 - 1;
             vertex.z = Math.random() * 30 - 1;
             vertex.velocity = new THREE.Vector3(0, -1, 0);
-            geometry.vertices.push( vertex );
+            geometry.vertices && geometry.vertices.push( vertex );
         }
 
         return geometry;
@@ -87,7 +88,7 @@ export class Confetti {
             if(this.particles[i].position.y < -1){
                 this.particles[i].position.y = 1;
             }
-            this.particles[i].position.y -= 0.1*Math.random();
+            this.particles[i].position.y -= 0.1 * Math.random();
         }
     }
 }
