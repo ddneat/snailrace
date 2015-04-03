@@ -24,7 +24,7 @@ export class Environment {
                     x: this.config.floorWidth / 2,
                     y: -(this.config.floorHeight / 2 - 2.9)
                 },
-                texture: 'floor_comic.jpg',
+                texture: 'floor.jpg',
                 repeat: this.config.floorWidth / 5
             }, {
                 size: {

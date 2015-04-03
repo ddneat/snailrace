@@ -432,7 +432,7 @@ var Environment = exports.Environment = (function () {
                 x: this.config.floorWidth / 2,
                 y: -(this.config.floorHeight / 2 - 2.9)
             },
-            texture: "floor_comic.jpg",
+            texture: "floor.jpg",
             repeat: this.config.floorWidth / 5
         }, {
             size: {
@@ -1052,7 +1052,7 @@ var Snail = exports.Snail = (function (_Model) {
              */
 
             value: function getTexturePath() {
-                return this.slimeCounter != 0 ? "img/slime.png" : "img/slimeBegin.png";
+                return this.slimeCounter != 0 ? "img/slime.png" : "img/slime-start.png";
             }
         },
         getSlimeTexture: {

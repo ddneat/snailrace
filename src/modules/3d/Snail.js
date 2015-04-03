@@ -38,7 +38,7 @@ export class Snail extends Model {
      * @return {String}
      */
     getTexturePath() {
-        return this.slimeCounter != 0 ? 'img/slime.png' : 'img/slimeBegin.png';
+        return this.slimeCounter != 0 ? 'img/slime.png' : 'img/slime-start.png';
     }
     /**
      * Snail.getTexturePath
