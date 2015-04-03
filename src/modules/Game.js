@@ -83,7 +83,7 @@ export class Game {
         snail.move();
 
         this.setCameraInGame();
-        this.isGameOver && this.checkGameOver(snailIndex);
+        !this.isGameOver && this.checkGameOver(snailIndex);
     }
     /**
      * Game.checkGameOver
