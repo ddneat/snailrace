@@ -7,8 +7,6 @@ class Snailrace {
      * e.g.: new Snailrace()
      */
     constructor() {
-        this.playerCount = 2;
-
         this.highscore = new Highscore();
         this.game = new Game();
 
@@ -40,11 +38,11 @@ class Snailrace {
      */
     addConfigOptions() {
         $("#playerAdd").click((function() {
-            this.playerCount < 4 && $("#playerCount").html(++this.playerCount);
+            this.game.playerCount < 4 && $("#playerCount").html(++this.game.playerCount);
         }).bind(this));
 
         $("#playerRemove").click((function() {
-            this.playerCount > 1 && $("#playerCount").html(--this.playerCount);
+            this.game.playerCount > 1 && $("#playerCount").html(--this.game.playerCount);
         }).bind(this));
     }
     /**
