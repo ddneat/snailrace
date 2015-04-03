@@ -999,6 +999,26 @@ var Snail = exports.Snail = (function (_Model) {
                 return Math.abs(this.model.position.z - this.config.modelSize / 2);
             }
         },
+        getTexturePath: {
+            /**
+             * Snail.getTexturePath
+             * e.g.: Snail.getTexturePath();
+             */
+
+            value: function getTexturePath() {
+                return this.slimeCounter != 0 ? "img/slime.png" : "img/slimeBegin.png";
+            }
+        },
+        isNewSlimeNeeded: {
+            /**
+             * Snail.isNewSlimeNeeded
+             * e.g.: Snail.isNewSlimeNeeded();
+             */
+
+            value: function isNewSlimeNeeded() {
+                return this.slimeCounter % 20 == 0;
+            }
+        },
         getSlime: {
             /**
              * Snail.getSlime
@@ -1007,9 +1027,8 @@ var Snail = exports.Snail = (function (_Model) {
 
             value: function getSlime() {
                 var slime;
-                if (this.slimeCounter % 20 == 0) {
-                    var texturePath = this.slimeCounter != 0 ? "img/slime.png" : "img/slimeBegin.png";
-                    var texture = THREE.ImageUtils.loadTexture(texturePath);
+                if (this.isNewSlimeNeeded()) {
+                    var texture = THREE.ImageUtils.loadTexture(this.getTexturePath());
                     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
                     texture.repeat.set(1, 1);
 

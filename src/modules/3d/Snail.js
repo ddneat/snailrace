@@ -32,14 +32,27 @@ export class Snail extends Model {
         return Math.abs(this.model.position.z - this.config.modelSize / 2);
     }
     /**
+     * Snail.getTexturePath
+     * e.g.: Snail.getTexturePath();
+     */
+    getTexturePath() {
+        return this.slimeCounter != 0 ? 'img/slime.png' : 'img/slimeBegin.png';
+    }
+    /**
+     * Snail.isNewSlimeNeeded
+     * e.g.: Snail.isNewSlimeNeeded();
+     */
+    isNewSlimeNeeded() {
+        return this.slimeCounter % 20 == 0;
+    }
+    /**
      * Snail.getSlime
      * e.g.: Snail.getSlime();
      */
-    getSlime(){
+    getSlime() {
         var slime;
-        if(this.slimeCounter%20 == 0){
-            var texturePath = this.slimeCounter != 0 ? 'img/slime.png' : 'img/slimeBegin.png';
-            var texture = THREE.ImageUtils.loadTexture(texturePath);
+        if(this.isNewSlimeNeeded()){
+            var texture = THREE.ImageUtils.loadTexture(this.getTexturePath());
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(1, 1);
 
