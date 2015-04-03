@@ -60,13 +60,13 @@ var Snailrace = (function () {
              */
 
             value: function addConfigOptions() {
-                $("#playerAdd").click(function () {
-                    playerCount < 4 && $("#playerCount").html(++this.playerCount);
-                });
+                $("#playerAdd").click((function () {
+                    this.playerCount < 4 && $("#playerCount").html(++this.playerCount);
+                }).bind(this));
 
-                $("#playerRemove").click(function () {
-                    playerCount > 4 && $("#playerCount").html(++this.playerCount);
-                });
+                $("#playerRemove").click((function () {
+                    this.playerCount > 1 && $("#playerCount").html(--this.playerCount);
+                }).bind(this));
             }
         },
         playerInput: {
@@ -1085,6 +1085,17 @@ var Game = exports.Game = (function () {
     }
 
     _createClass(Game, {
+        getSnailByIndex: {
+            /**
+             * Game.getSnailByIndex
+             *
+             * @return {Snail}
+             */
+
+            value: function getSnailByIndex(index) {
+                return this.playerSnails.snails[index];
+            }
+        },
         getEndTime: {
             /**
              * Game.getEndTime
@@ -1108,11 +1119,9 @@ var Game = exports.Game = (function () {
             value: function getFirstAndLastSnailPositionZ() {
                 var min = 10,
                     max = 0,
-                    element,
                     z;
                 for (var i = 0; i < this.playerSnails.snails.length; i++) {
-                    element = this.playerSnails.snails[i].model;
-                    z = Math.abs(element.position.z);
+                    z = Math.abs(this.getSnailByIndex(i).model.position.z);
                     if (z < min) {
                         min = z;
                     }
@@ -1142,7 +1151,7 @@ var Game = exports.Game = (function () {
             value: function modelMove(snailIndex) {
                 if (!this.startTime) {
                     return;
-                }var snail = this.playerSnails.snails[snailIndex];
+                }var snail = this.getSnailByIndex(snailIndex);
                 this.scene.add(snail.getSlime());
                 snail.move();
 
@@ -1167,7 +1176,7 @@ var Game = exports.Game = (function () {
              */
 
             value: function isSnailOverFinish(snailIndex) {
-                return this.playerSnails.snails[snailIndex].getModelCenter() >= this.config.finPosZ;
+                return this.getSnailByIndex(snailIndex).getModelCenter() >= this.config.finPosZ;
             }
         },
         addCounter: {
@@ -1192,12 +1201,11 @@ var Game = exports.Game = (function () {
              */
 
             value: function startGame(gameOverCallback) {
-                this.models.setPlayerSnails(this.playerCount);
+                this.gameOverCallback = gameOverCallback;
                 this.setCameraInGame();
                 this.addCounter();
+                this.models.setPlayerSnails(this.playerCount);
                 this.renderer.render();
-
-                this.gameOverCallback = gameOverCallback;
             }
         },
         setGameOver: {
@@ -1209,12 +1217,21 @@ var Game = exports.Game = (function () {
             value: function setGameOver(winID) {
                 this.isGameOver = true;
                 this.winnerTrack = winID + 1;
+                this.endTime = this.getEndTime();
 
+                this.addWinnerEffects();
+                this.gameOverCallback(this.endTime);
+            }
+        },
+        addWinnerEffects: {
+            /**
+             * Game.addWinnerEffects
+             * e.g.: Game.addWinnerEffects();
+             */
+
+            value: function addWinnerEffects() {
                 this.environment.addWinnerCaption(this.winnerTrack);
                 this.confetti = new Confetti(this.scene, this.config, this.winnerTrack);
-
-                this.endTime = this.getEndTime();
-                this.gameOverCallback(this.endTime);
             }
         }
     });

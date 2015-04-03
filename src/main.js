@@ -39,13 +39,13 @@ class Snailrace {
      * e.g.: Snailrace.addConfigOptions();
      */
     addConfigOptions() {
-        $("#playerAdd").click(function() {
-            playerCount < 4 && $("#playerCount").html(++this.playerCount);
-        });
+        $("#playerAdd").click((function() {
+            this.playerCount < 4 && $("#playerCount").html(++this.playerCount);
+        }).bind(this));
 
-        $("#playerRemove").click(function() {
-            playerCount > 4 && $("#playerCount").html(++this.playerCount);
-        });
+        $("#playerRemove").click((function() {
+            this.playerCount > 1 && $("#playerCount").html(--this.playerCount);
+        }).bind(this));
     }
     /**
      * Snailrace.playerInput
