@@ -1,9 +1,11 @@
 global.self = {};
 global.window = {};
 global.document = {};
-global.THREE = require('three');
+
 import assert from 'assert';
 import { Game } from '../src/modules/Game.js';
+import { THREE } from '../test/helpers/threeHelper.js';
+global.THREE = THREE;
 
 describe.skip('Game', function() {
     describe('setGameOver', function() {

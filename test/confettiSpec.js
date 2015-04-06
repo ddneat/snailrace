@@ -3,9 +3,9 @@ import { Confetti } from '../src/modules/3d/Confetti.js';
 import { THREE } from '../test/helpers/threeHelper.js';
 global.THREE = THREE;
 
-describe('Confetti', function() {
+var confetti = null;
 
-    var confetti = null;
+describe('Confetti', function() {
 
     beforeEach(function(){
         confetti = new Confetti(new THREE.Scene(), {}, 1);
