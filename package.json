@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidneat/snailrace.git"
+    "url": "https://github.com/davidspinat/snailrace.git"
   },
-  "author": "14pixels and davidneat",
+  "author": "14pixels and davidspinat",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/davidneat/snailrace/issues"
+    "url": "https://github.com/davidspinat/snailrace/issues"
   },
-  "homepage": "https://github.com/davidneat/snailrace",
+  "homepage": "https://github.com/davidspinat/snailrace",
   "devDependencies": {
     "babel-core": "^4.7.16",
     "babelify": "^5.0.4",
